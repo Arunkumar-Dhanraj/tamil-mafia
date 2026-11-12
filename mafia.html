@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#221338">
+<meta name="description" content="Host-run Mafia party game in Tamil and English, played on one phone.">
+<title>மாஃபியா | பார்ட்டி விளையாட்டு</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@600;800&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --marigold: #F7B32B;
+    --marigold-deep: #E39B0B;
+    --ink: #221338;
+    --ink-deep: #140A24;
+    --jasmine: #FFF8E7;
+    --muted: #5B4A6E;
+    --village: #0B7A75;
+    --village-deep: #075955;
+    --mafia: #D62839;
+    --mafia-deep: #A3172A;
+    --solo: #7B3FA0;
+    --solo-deep: #5A2C77;
+    --display: "Baloo Thambi 2", "Noto Sans Tamil", "Tamil Sangam MN", "Tamil MN", "Nirmala UI", "Latha", system-ui, sans-serif;
+    --body: "Noto Sans Tamil", "Tamil Sangam MN", "Tamil MN", "Nirmala UI", "Latha", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --r-lg: 22px;
+    --r-md: 14px;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh; min-height: 100dvh;
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink);
+    background-color: var(--marigold);
+    background-image: radial-gradient(circle, rgba(34, 19, 56, .14) 1.6px, transparent 2.2px);
+    background-size: 22px 22px;
+    transition: background-color .35s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body.dark {
+    background-color: var(--ink);
+    background-image: radial-gradient(circle, rgba(247, 179, 43, .10) 1.6px, transparent 2.2px);
+    color: var(--jasmine);
+  }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  button { touch-action: manipulation; cursor: pointer; }
+  h1, h2, h3 { font-family: var(--display); margin: 0; line-height: 1.25; }
+  p { margin: 0; }
+
+  .app { width: 100%; max-width: 520px; margin: 0 auto; padding: max(14px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom)); }
+  .enter { animation: enter .3s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    position: relative; overflow: hidden;
+    display: block; width: 100%;
+    min-height: 58px;
+    padding: 12px 18px;
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    background: var(--jasmine); color: var(--ink);
+    font-family: var(--display); font-weight: 800; font-size: 20px; line-height: 1.35;
+    text-align: center;
+    box-shadow: 0 5px 0 var(--ink);
+    transition: transform .08s ease, box-shadow .08s ease, opacity .2s ease;
+  }
+  .btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.primary { background: var(--ink); color: var(--jasmine); box-shadow: 0 5px 0 var(--ink-deep); }
+  .btn.go { background: var(--marigold); color: var(--ink); border-color: var(--marigold); box-shadow: 0 5px 0 var(--marigold-deep); }
+  .btn.danger { background: var(--mafia); color: #fff; border-color: var(--mafia-deep); box-shadow: 0 5px 0 var(--mafia-deep); }
+  .btn.ghost-dark { background: transparent; color: var(--jasmine); border-color: var(--jasmine); box-shadow: 0 5px 0 rgba(255, 248, 231, .3); }
+  .btn.small { min-height: 46px; font-size: 17px; padding: 8px 14px; }
+  .btn + .btn, .btn + .link, .stack > * + * { margin-top: 14px; }
+  .link {
+    display: block; margin: 16px auto 0; padding: 10px 14px;
+    background: none; border: none;
+    font-weight: 600; font-size: 16px;
+    text-decoration: underline; text-underline-offset: 4px;
+  }
+  :focus-visible { outline: 3px solid var(--village); outline-offset: 3px; }
+  body.dark :focus-visible { outline-color: var(--marigold); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none;
+    min-height: 40px; padding: 4px 14px;
+    border: 2.5px solid currentColor; border-radius: 999px;
+    background: transparent;
+    font-weight: 700; font-size: 15px;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 46px; margin-bottom: 14px; }
+  .topbar .grow { flex: 1; min-width: 0; font-weight: 700; font-size: 15px; opacity: .85; }
+  .dots { display: flex; flex-wrap: wrap; gap: 5px; }
+  .dots i { width: 11px; height: 11px; border-radius: 50%; border: 2px solid currentColor; opacity: .5; }
+  .dots i.done { background: currentColor; }
+  .dots i.now { background: var(--marigold); border-color: var(--marigold); opacity: 1; transform: scale(1.25); }
+
+  /* ---------- panels ---------- */
+  .panel {
+    background: var(--jasmine); color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: var(--r-lg);
+    box-shadow: 0 6px 0 var(--ink);
+    padding: 18px 16px 20px;
+    margin-bottom: 22px;
+  }
+  .panel > h2 { font-size: 23px; font-weight: 800; }
+  .hint { font-size: 15px; color: var(--muted); margin: 2px 0 12px; }
+  body.dark .hint-dark { color: rgba(255, 248, 231, .75); }
+
+  .hero { text-align: center; padding: 4px 0 18px; }
+  .hero .mark { font-size: 54px; line-height: 1; }
+  .hero h1 { font-size: clamp(44px, 13vw, 60px); font-weight: 800; line-height: 1.15; text-shadow: 3px 3px 0 var(--jasmine); }
+  .hero p { margin: 4px auto 0; max-width: 32ch; font-weight: 600; }
+
+  .banner {
+    background: var(--ink); color: var(--jasmine);
+    border-radius: var(--r-lg);
+    padding: 16px;
+    margin-bottom: 22px;
+  }
+  .banner h2 { font-size: 21px; margin-bottom: 10px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row2 .btn + .btn { margin-top: 0; }
+
+  /* ---------- names ---------- */
+  .names { display: grid; gap: 10px; }
+  .name-row { display: flex; align-items: center; gap: 8px; }
+  .name-row .num {
+    flex: none; width: 34px; height: 34px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--ink); color: var(--jasmine); font-weight: 700; font-size: 15px;
+  }
+  .name-row input {
+    flex: 1 1 0; min-width: 0; width: 100%; height: 50px;
+    padding: 0 14px;
+    border: 2.5px solid var(--ink); border-radius: var(--r-md);
+    background: #fff; font-size: 18px;
+  }
+  .name-row input::placeholder { color: #9A8BA8; }
+  .name-row input.invalid { border-color: var(--mafia); background: #FFECEE; }
+  .x-btn {
+    flex: none; width: 44px; height: 44px; border-radius: 50%;
+    border: 2px solid rgba(34, 19, 56, .3); background: transparent;
+    font-size: 20px; line-height: 1;
+  }
+  .x-btn:disabled { opacity: .3; cursor: not-allowed; }
+  .add-btn { margin-top: 12px; }
+
+  /* ---------- role rows ---------- */
+  .team-head { display: flex; align-items: center; gap: 8px; margin: 18px 0 8px; font-family: var(--display); font-weight: 800; font-size: 19px; }
+  .team-head:first-of-type { margin-top: 6px; }
+  .team-head::before { content: ""; width: 14px; height: 14px; border-radius: 4px; background: var(--c); }
+  .roles { display: grid; gap: 10px; }
+  .role-row {
+    display: grid; grid-template-columns: 36px minmax(0, 1fr); grid-template-areas: "e n" "e d" "e s";
+    align-items: center; column-gap: 10px; row-gap: 2px;
+    padding: 10px 10px 10px 8px;
+    border: 2px solid rgba(34, 19, 56, .18);
+    border-left: 6px solid var(--c);
+    border-radius: var(--r-md);
+    background: #fff;
+  }
+  .role-row.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 9%, #fff); }
+  .role-row .emo { grid-area: e; align-self: start; padding-top: 6px; font-size: 26px; text-align: center; line-height: 1; }
+  .role-row .nm { grid-area: n; font-weight: 700; font-size: 17px; line-height: 1.35; }
+  .role-row .sh { grid-area: d; font-size: 14px; color: var(--muted); line-height: 1.45; }
+  .role-row .stepper { grid-area: s; justify-self: end; margin-top: 4px; }
+  @media (min-width: 440px) {
+    .role-row { grid-template-columns: 36px minmax(0, 1fr) auto; grid-template-areas: "e n s" "e d d"; }
+    .role-row .stepper { margin-top: 0; }
+  }
+  .stepper { display: flex; align-items: center; gap: 4px; }
+  .stepper button {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 2.5px solid var(--ink); background: var(--marigold);
+    font-size: 22px; font-weight: 700; line-height: 1;
+  }
+  .stepper button:disabled { opacity: .3; cursor: not-allowed; }
+  .stepper output { min-width: 26px; text-align: center; font-family: var(--display); font-weight: 800; font-size: 22px; }
+  .role-row .del { font-size: 13px; margin-top: 2px; padding: 0; border: none; background: none; text-decoration: underline; color: var(--mafia-deep); }
+
+  details.custom { margin-top: 16px; border: 2.5px dashed var(--ink); border-radius: var(--r-md); padding: 4px 14px; }
+  details.custom summary { padding: 10px 0; font-weight: 700; cursor: pointer; }
+  .field { display: block; margin-bottom: 12px; }
+  .field > span { display: block; font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .field input, .field textarea {
+    width: 100%; padding: 10px 12px;
+    border: 2.5px solid var(--ink); border-radius: var(--r-md); background: #fff; font-size: 17px;
+  }
+  .field textarea { min-height: 80px; resize: vertical; }
+  .seg3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .seg3 button {
+    min-height: 46px; padding: 6px 4px;
+    border: 2.5px solid var(--ink); border-radius: var(--r-md);
+    background: #fff; font-weight: 700; font-size: 15px; line-height: 1.3;
+  }
+  .seg3 button[aria-pressed="true"] { background: var(--c); color: #fff; border-color: var(--c); }
+  .check { display: flex; align-items: flex-start; gap: 12px; padding: 6px 0; font-weight: 600; cursor: pointer; }
+  .check input { width: 26px; height: 26px; flex: none; margin: 2px 0 0; accent-color: var(--ink); }
+
+  .dock {
+    position: sticky; bottom: 0; z-index: 5;
+    margin: 0 -16px; padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+    background: var(--marigold);
+    border-top: 3px solid var(--ink);
+  }
+  .status { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-weight: 700; }
+  .status .ok { color: var(--village-deep); }
+  .status .bad { color: var(--mafia-deep); }
+  .msg { padding: 10px 12px; border-radius: var(--r-md); font-weight: 600; font-size: 15px; margin-bottom: 10px; }
+  .msg.err { background: var(--mafia); color: #fff; }
+  .msg.warn { background: var(--jasmine); border: 2px solid var(--ink); }
+
+  details.howto { margin: 4px 0 22px; background: rgba(255, 248, 231, .55); border: 2.5px dashed var(--ink); border-radius: var(--r-lg); padding: 4px 16px; }
+  details.howto summary { padding: 12px 0; font-weight: 700; font-size: 18px; cursor: pointer; }
+  details.howto ol { margin: 0 0 14px; padding-left: 22px; }
+  details.howto li { margin-bottom: 8px; }
+
+  /* ---------- handoff / reveal ---------- */
+  .center { text-align: center; }
+  .handoff { padding-top: 5vh; }
+  .handoff .lead { font-size: 18px; opacity: .85; }
+  .who { font-family: var(--display); font-weight: 800; font-size: clamp(40px, 12vw, 62px); line-height: 1.2; color: var(--marigold); margin: 10px 0 16px; overflow-wrap: anywhere; }
+  .who.sm { font-size: 30px; margin: 0 0 16px; }
+  .who.md { font-size: clamp(28px, 8vw, 38px); }
+  .warnbox { display: inline-block; margin: 0 0 36px; padding: 10px 16px; border-radius: var(--r-md); background: rgba(255, 248, 231, .08); border: 1.5px solid rgba(255, 248, 231, .25); font-size: 16px; }
+  .done-note { color: #8FE3D2; font-weight: 600; font-size: 15px; margin-bottom: 16px; }
+
+  .card {
+    border-radius: 26px;
+    border: 3px solid var(--jasmine);
+    padding: 24px 18px;
+    margin-bottom: 26px;
+    user-select: none; -webkit-user-select: none;
+  }
+  .card.covered {
+    min-height: 300px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    background-color: var(--jasmine); color: var(--ink);
+    background-image: radial-gradient(circle, rgba(34, 19, 56, .18) 2px, transparent 2.6px);
+    background-size: 26px 26px;
+  }
+  .card.covered .q { width: 110px; height: 110px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--marigold); font-family: var(--display); font-size: 66px; font-weight: 800; margin-bottom: 16px; }
+  .card.covered p { font-weight: 600; max-width: 26ch; background: var(--jasmine); padding: 4px 8px; border-radius: 8px; }
+  .card.role { color: #fff; background: var(--c); border-color: color-mix(in srgb, var(--c) 45%, #fff); box-shadow: 0 8px 0 var(--cd); animation: flip .45s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes flip { from { transform: perspective(900px) rotateY(80deg) scale(.94); opacity: .3; } to { transform: none; opacity: 1; } }
+  .card.role .top { text-align: center; }
+  .card.role .emo { font-size: 64px; line-height: 1.1; }
+  .card.role .you { font-size: 16px; opacity: .9; }
+  .card.role .rname { font-family: var(--display); font-weight: 800; font-size: 46px; line-height: 1.2; margin: 2px 0 8px; }
+  .chip { display: inline-block; padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, .2); font-size: 14px; font-weight: 700; }
+  .card.role h3 { font-family: var(--body); font-size: 15px; font-weight: 700; opacity: .9; margin: 18px 0 4px; }
+  .card.role p { font-size: 17px; line-height: 1.6; }
+  .card.role .team { margin-top: 18px; padding: 12px 14px; border-radius: var(--r-md); background: rgba(0, 0, 0, .2); }
+  .card.role .team h3 { margin-top: 0; }
+  .card.role .team ul { margin: 0; padding-left: 20px; font-weight: 700; }
+
+  .hold { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .hold .fill { position: absolute; inset: 0; width: 0; background: rgba(34, 19, 56, .25); }
+  .hold.holding .fill { width: 100%; transition: width 1s linear; }
+  .hold .lbl { position: relative; }
+
+  /* ---------- host ---------- */
+  .host-tag { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; padding: 4px 12px; border-radius: 999px; background: var(--ink); color: var(--jasmine); font-weight: 700; font-size: 14px; }
+  body.dark .host-tag { background: var(--marigold); color: var(--ink); }
+  .phase {
+    border-radius: var(--r-lg); padding: 18px 16px;
+    margin-bottom: 22px;
+    border: 3px solid var(--ink);
+  }
+  .phase.night { background: var(--ink); color: var(--jasmine); box-shadow: 0 6px 0 var(--ink-deep); }
+  .phase.day { background: var(--jasmine); box-shadow: 0 6px 0 var(--ink); }
+  .phase h2 { font-size: 32px; font-weight: 800; }
+  .phase .sub { margin: 2px 0 14px; font-size: 15px; opacity: .85; }
+  .phase .note { margin-bottom: 14px; padding: 10px 12px; border-radius: var(--r-md); background: rgba(123, 63, 160, .14); font-weight: 600; font-size: 15px; }
+
+  .timer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; padding: 10px 12px; border: 2px solid rgba(34, 19, 56, .2); border-radius: var(--r-md); background: #fff; }
+  .timer output { font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .timer output.up { color: var(--mafia); }
+  .timer .tb { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .timer .tb button { min-height: 40px; padding: 4px 10px; border: 2px solid var(--ink); border-radius: 999px; background: var(--jasmine); font-weight: 700; font-size: 14px; }
+
+  .winbox { margin-bottom: 22px; padding: 14px 16px; border-radius: var(--r-lg); background: var(--village); color: #fff; border: 3px solid var(--ink); }
+  .winbox p { font-weight: 700; margin-bottom: 10px; }
+  .counts { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .counts span { padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 14px; color: #fff; background: var(--c); }
+
+  .plist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .prow {
+    display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 10px;
+    width: 100%; padding: 10px 12px;
+    border: 2px solid rgba(34, 19, 56, .18); border-left: 6px solid var(--c);
+    border-radius: var(--r-md); background: #fff; text-align: left;
+  }
+  .prow.dead { background: #EFE8F3; }
+  .prow.dead .pn, .prow.dead .pr { opacity: .55; }
+  .prow .pe { font-size: 24px; text-align: center; }
+  .prow .pn { font-weight: 700; font-size: 17px; overflow-wrap: anywhere; line-height: 1.35; }
+  .prow .pr { font-size: 14px; color: var(--muted); }
+  .prow .st { font-size: 13px; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: rgba(34, 19, 56, .08); white-space: nowrap; }
+  .prow .st.dead { background: var(--ink); color: var(--jasmine); }
+  .tags { display: inline-flex; gap: 4px; flex-wrap: wrap; margin-left: 4px; }
+  .tags b { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--solo); color: #fff; }
+  .pactions { padding: 10px 0 4px; display: grid; gap: 10px; }
+
+  details.log { margin-top: 18px; }
+  details.log summary { font-weight: 700; padding: 8px 0; cursor: pointer; }
+  details.log ol { margin: 0; padding-left: 22px; font-size: 15px; }
+  details.log li { margin-bottom: 4px; }
+  details.log li small { font-weight: 700; color: var(--muted); }
+
+  /* ---------- narration ---------- */
+  .script {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(25px, 7.4vw, 32px); line-height: 1.4;
+    padding: 18px 18px; margin-bottom: 16px;
+    border-radius: var(--r-lg);
+    background: rgba(255, 248, 231, .07);
+    border: 2px solid rgba(255, 248, 231, .22);
+  }
+  .script.sleep { font-size: 21px; opacity: .85; margin-top: 18px; }
+  .readaloud { font-size: 14px; font-weight: 700; color: var(--marigold); margin-bottom: 6px; }
+  .hostnote { padding: 12px 14px; border-radius: var(--r-md); background: rgba(247, 179, 43, .14); border: 1.5px solid rgba(247, 179, 43, .45); font-size: 15px; margin-bottom: 14px; }
+  .hostnote b { color: var(--marigold); }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .target {
+    min-height: 58px; padding: 8px 10px;
+    border: 2.5px solid currentColor; border-radius: var(--r-md);
+    background: transparent;
+    font-weight: 700; font-size: 17px; line-height: 1.35; overflow-wrap: anywhere;
+  }
+  body:not(.dark) .target { background: #fff; }
+  .target[aria-pressed="true"] { background: var(--marigold); color: var(--ink); border-color: var(--marigold); box-shadow: 0 4px 0 var(--marigold-deep); }
+  body:not(.dark) .target[aria-pressed="true"] { background: var(--ink); color: var(--jasmine); border-color: var(--ink); box-shadow: 0 4px 0 var(--mafia); }
+  .target small { display: block; font-size: 12px; font-weight: 600; opacity: .8; }
+  .target:disabled { opacity: .35; cursor: not-allowed; }
+  .target.none { grid-column: 1 / -1; min-height: 50px; border-style: dashed; }
+  .sub-h { font-weight: 700; margin: 14px 0 8px; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+    padding: 24px;
+    background: var(--ink-deep); color: var(--jasmine);
+    text-align: center;
+    animation: enter .25s ease;
+  }
+  .overlay .big { font-size: 110px; line-height: 1; }
+  .overlay .res { font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 1.25; }
+  .overlay .btn { max-width: 360px; }
+
+  /* ---------- announcements ---------- */
+  .announce { text-align: center; margin: 10px 0 22px; }
+  .announce .big-emo { font-size: 56px; line-height: 1.1; }
+  .announce h2 { font-size: clamp(28px, 8vw, 36px); font-weight: 800; }
+  .lines { display: grid; gap: 10px; margin-bottom: 22px; }
+  .line { padding: 14px 16px; border-radius: var(--r-lg); border: 3px solid var(--ink); background: var(--jasmine); font-family: var(--display); font-weight: 800; font-size: 22px; line-height: 1.4; box-shadow: 0 5px 0 var(--ink); }
+  .line.death { background: var(--mafia); color: #fff; border-color: var(--mafia-deep); box-shadow: 0 5px 0 var(--mafia-deep); }
+  .line.good { background: var(--village); color: #fff; border-color: var(--village-deep); box-shadow: 0 5px 0 var(--village-deep); }
+  .line.solo { background: var(--solo); color: #fff; border-color: var(--solo-deep); box-shadow: 0 5px 0 var(--solo-deep); }
+  .private { margin-bottom: 22px; padding: 12px 14px; border-radius: var(--r-md); border: 2.5px dashed var(--ink); background: rgba(255, 248, 231, .7); font-size: 15px; font-weight: 600; }
+
+  .result-hero { text-align: center; border-radius: 28px; border: 3px solid var(--ink); padding: 22px 16px; margin-bottom: 22px; color: #fff; background: var(--c); box-shadow: 0 7px 0 var(--cd); animation: pop .5s cubic-bezier(.2, 1.4, .4, 1); }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
+  .result-hero .big-emo { font-size: 58px; line-height: 1.1; }
+  .result-hero h2 { font-size: clamp(30px, 9vw, 40px); font-weight: 800; }
+  .result-hero p { font-weight: 600; margin-top: 4px; }
+
+  @media (max-width: 350px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .role-row { grid-template-columns: 28px minmax(0, 1fr); column-gap: 6px; }
+    .role-row .emo { font-size: 22px; }
+    .stepper button { width: 36px; height: 36px; }
+    .card.role .rname { font-size: 38px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<main class="app" id="app"></main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =====================================================================
+     CHARACTERS
+     ===================================================================== */
+  const ROLES = {
+    mafia:     { team: "mafia",   emoji: "🕴️", max: 99 },
+    boss:      { team: "mafia",   emoji: "🎩", max: 1 },
+    framer:    { team: "mafia",   emoji: "🧤", max: 1 },
+    villager:  { team: "village", emoji: "🧑‍🌾", max: 99 },
+    doctor:    { team: "village", emoji: "🩺", max: 1 },
+    police:    { team: "village", emoji: "👮", max: 1 },
+    detective: { team: "village", emoji: "🕵️", max: 1 },
+    bodyguard: { team: "village", emoji: "🛡️", max: 1 },
+    witch:     { team: "village", emoji: "🧪", max: 1 },
+    cupid:     { team: "village", emoji: "💘", max: 1 },
+    mayor:     { team: "village", emoji: "🎖️", max: 1 },
+    hunter:    { team: "village", emoji: "🏹", max: 1 },
+    ghost:     { team: "village", emoji: "👻", max: 1 },
+    killer:    { team: "solo",    emoji: "🔪", max: 1 },
+    jester:    { team: "solo",    emoji: "🤡", max: 1 }
+  };
+  const ROLE_ORDER = Object.keys(ROLES);
+  const TEAM_COLORS = { mafia: ["#D62839", "#A3172A"], village: ["#0B7A75", "#075955"], solo: ["#7B3FA0", "#5A2C77"] };
+
+  const ROLE_TEXT = {
+    ta: {
+      mafia: { name: "மாஃபியா", short: "ஒவ்வொரு இரவும் ஒருவரைக் கொல்வார்",
+        does: "ஒவ்வொரு இரவும் உங்கள் மாஃபியா குழுவுடன் கண் விழித்து, யாரைக் கொல்வது என்று சைகையால் முடிவு செய்யுங்கள். பகலில் அப்பாவி போல நடியுங்கள்!" },
+      boss: { name: "மாஃபியா தலைவன்", short: "மாஃபியாவின் தலைவன்; சோதனையில் அப்பாவியாகத் தெரிவார்",
+        does: "நீங்கள் மாஃபியாவின் தலைவன். இரவில் அவர்களுடன் கண் விழித்து, யாரைக் கொல்வது என்று இறுதி முடிவு எடுப்பீர்கள். காவலர் அல்லது துப்பறிவாளர் சோதித்தால், நீங்கள் அப்பாவி கிராமவாசியாகவே தெரிவீர்கள்." },
+      framer: { name: "சதிகாரன்", short: "ஒரு அப்பாவியை மாஃபியா போலக் காட்டுவார்",
+        does: "நீங்கள் மாஃபியா குழுவைச் சேர்ந்தவர்: அவர்களுடன் கண் விழித்துக் கொலையைத் தேர்ந்தெடுப்பீர்கள். பிறகு தனியாகக் கண் விழித்து ஒருவர் மீது பழி சுமத்துவீர்கள். இன்றிரவு காவலர் அல்லது துப்பறிவாளர் அவரைச் சோதித்தால், அவர் மாஃபியாவாகத் தெரிவார்." },
+      villager: { name: "கிராமவாசி", short: "சிறப்புச் சக்தி இல்லை; பேசி மாஃபியாவைக் கண்டுபிடிப்பார்",
+        does: "இரவில் உங்களுக்குச் சிறப்புச் சக்தி இல்லை. கண்களை மூடியே இருங்கள். பகலில் கவனமாகக் கேட்டு, மாஃபியாவை வாக்களித்து வெளியேற்றுங்கள்." },
+      doctor: { name: "மருத்துவர்", short: "ஒவ்வொரு இரவும் ஒருவரைக் காப்பாற்றுவார்",
+        does: "ஒவ்வொரு இரவும் கண் விழித்து, ஒருவரைக் காப்பாற்றத் தேர்ந்தெடுங்கள் (உங்களையும் தேர்ந்தெடுக்கலாம்). அவர் தாக்கப்பட்டால், அவர் உயிர் பிழைப்பார்." },
+      police: { name: "காவலர்", short: "ஒருவர் மாஃபியாவா என்று சோதிப்பார்",
+        does: "ஒவ்வொரு இரவும் கண் விழித்து ஒருவரைச் சுட்டிக்காட்டுங்கள். அவர் மாஃபியா என்றால் தொகுப்பாளர் 👍 காட்டுவார், இல்லையென்றால் 👎. மாஃபியா தலைவன் உங்களை ஏமாற்றுவார்." },
+      detective: { name: "துப்பறிவாளர்", short: "ஒருவரின் சரியான கதாபாத்திரத்தை அறிவார்",
+        does: "ஒவ்வொரு இரவும் கண் விழித்து ஒருவரைச் சுட்டிக்காட்டுங்கள். அவருடைய சரியான கதாபாத்திரத்தைத் தொகுப்பாளர் ரகசியமாகக் காட்டுவார். மாஃபியா தலைவன் கிராமவாசியாகவே தெரிவார்." },
+      bodyguard: { name: "மெய்க்காப்பாளர்", short: "ஒருவரைக் காத்து, அவருக்குப் பதிலாக உயிர் விடுவார்",
+        does: "ஒவ்வொரு இரவும் ஒருவரைக் காக்கத் தேர்ந்தெடுங்கள் (உங்களை அல்ல). அவர் தாக்கப்பட்டால், அவர் பிழைப்பார்; அவருக்குப் பதிலாக நீங்கள் இறப்பீர்கள்." },
+      witch: { name: "சூனியக்காரி", short: "ஒரு உயிர் மருந்து, ஒரு விஷம்",
+        does: "உங்களிடம் இரண்டு மருந்துகள் உள்ளன; ஒவ்வொன்றையும் ஆட்டத்தில் ஒருமுறை மட்டுமே பயன்படுத்தலாம். ஒவ்வொரு இரவும் யார் தாக்கப்பட்டார் என்று தொகுப்பாளர் காட்டுவார். உயிர் மருந்தால் அவரைக் காப்பாற்றலாம், அல்லது விஷத்தால் யாரையாவது கொல்லலாம்." },
+      cupid: { name: "மன்மதன்", short: "முதல் இரவில் இருவரைக் காதலர்களாக்குவார்",
+        does: "முதல் இரவில் மட்டும், இருவரைக் காதலர்களாகத் தேர்ந்தெடுங்கள் (உங்களையும் தேர்ந்தெடுக்கலாம்). காதலர்களில் ஒருவர் இறந்தால், மற்றவர் மனமுடைந்து இறப்பார்." },
+      mayor: { name: "ஊர்த் தலைவர்", short: "இவருடைய வாக்கு இரண்டாகக் கணக்கிடப்படும்",
+        does: "இரவில் சிறப்புச் சக்தி இல்லை, ஆனால் பகல் வாக்கெடுப்பில் உங்கள் வாக்கு இரண்டாகக் கணக்கிடப்படும். நீங்கள் ஊர்த் தலைவர் என்று எப்போது வேண்டுமானாலும் சொல்லலாம், ஆனால் அப்போது மாஃபியாவுக்கும் தெரிந்துவிடும்." },
+      hunter: { name: "வேட்டைக்காரன்", short: "இறக்கும்போது ஒருவரைச் சுட்டு வீழ்த்துவார்",
+        does: "இரவில் சிறப்புச் சக்தி இல்லை. ஆனால் நீங்கள் கொல்லப்பட்டாலோ வெளியேற்றப்பட்டாலோ, உடனே ஒருவரைச் சுட்டு வீழ்த்தலாம்." },
+      ghost: { name: "பேய்", short: "இறந்த பிறகு, ஒவ்வொரு இரவும் ஒருவரைப் பேசவிடாமல் செய்வார்",
+        does: "உயிருடன் இருக்கும்போது நீங்கள் சாதாரண கிராமவாசி. நீங்கள் இறந்த பிறகு பேயாகத் திரும்புவீர்கள்: ஒவ்வொரு இரவும் தொகுப்பாளர் உங்களை எழுப்புவார். நீங்கள் ஒருவரைப் பிடிக்கலாம்; அவர் அடுத்த நாள் பேசவோ வாக்களிக்கவோ கூடாது." },
+      killer: { name: "தொடர் கொலைகாரன்", short: "ஒவ்வொரு இரவும் தனியாகக் கொல்வார்",
+        does: "நீங்கள் யார் பக்கமும் இல்லை. ஒவ்வொரு இரவும் தனியாகக் கண் விழித்து ஒருவரைக் கொல்வீர்கள். காவலர் சோதித்தால் நீங்கள் மாஃபியா இல்லை என்றே தெரியும்." },
+      jester: { name: "கோமாளி", short: "வாக்கெடுப்பில் வெளியேற்றப்பட்டால் தனியாக வெல்வார்",
+        does: "நீங்கள் யார் பக்கமும் இல்லை. சந்தேகப்படும்படி நடந்து, கிராமத்தினர் உங்களை வாக்களித்து வெளியேற்றும்படி செய்யுங்கள்!" }
+    },
+    en: {
+      mafia: { name: "Mafia", short: "Kills one player each night",
+        does: "Every night you wake up with your Mafia team and silently agree on one player to kill. During the day, act innocent!" },
+      boss: { name: "Mafia Boss", short: "Leads the Mafia; looks innocent when checked",
+        does: "You lead the Mafia. You wake with them at night and have the final say on who is killed. If the Police or Detective check you, you look like an innocent Villager." },
+      framer: { name: "Framer", short: "Makes an innocent player look like Mafia",
+        does: "You're in the Mafia: you wake with them to choose the kill. Then you wake alone and frame one player. If the Police or Detective check that player tonight, they'll look like Mafia." },
+      villager: { name: "Villager", short: "No power; finds the Mafia by talking",
+        does: "You have no special power at night. Keep your eyes closed, listen carefully during the day, and vote the Mafia out." },
+      doctor: { name: "Doctor", short: "Saves one player each night",
+        does: "Every night you wake up and choose one player to save (you can choose yourself). If that player is attacked, they survive." },
+      police: { name: "Police", short: "Checks whether a player is Mafia",
+        does: "Every night you wake up and point at one player. The host shows 👍 if they're Mafia and 👎 if not. The Mafia Boss fools you." },
+      detective: { name: "Detective", short: "Learns a player's exact character",
+        does: "Every night you wake up and point at one player. The host secretly shows you their exact character. The Mafia Boss shows up as a Villager." },
+      bodyguard: { name: "Bodyguard", short: "Guards one player and dies in their place",
+        does: "Every night, choose one player to guard (not yourself). If they're attacked, they survive and you die instead." },
+      witch: { name: "Witch", short: "One healing potion, one poison",
+        does: "You have two potions, each usable once per game. Every night the host shows you who was attacked. Use the healing potion to save them, or the poison to kill any player." },
+      cupid: { name: "Cupid", short: "Makes two players fall in love on night 1",
+        does: "On the first night only, choose two players to become Lovers (you can pick yourself). If one Lover dies, the other dies of a broken heart." },
+      mayor: { name: "Mayor", short: "Their vote counts twice",
+        does: "You have no night power, but your vote counts as two in the day vote. You can reveal you're the Mayor at any time, but then the Mafia will know too." },
+      hunter: { name: "Hunter", short: "Takes someone down when they die",
+        does: "You have no night power. But if you're killed or voted out, you immediately take one player down with you." },
+      ghost: { name: "Ghost", short: "After dying, silences one player each night",
+        does: "While alive you're an ordinary villager. Once you die you come back as a ghost: every night the host wakes you to haunt one player, who can't speak or vote the next day." },
+      killer: { name: "Serial Killer", short: "Kills alone every night",
+        does: "You're on nobody's side. Every night you wake up alone and kill one player. The Police see you as not Mafia." },
+      jester: { name: "Joker", short: "Wins alone if voted out",
+        does: "You're on nobody's side. Act suspicious and trick the village into voting you out!" }
+    }
+  };
+
+  /* =====================================================================
+     UI TEXT (Tamil + English)
+     ===================================================================== */
+  const STR = {
+    ta: {
+      docTitle: "மாஃபியா | பார்ட்டி விளையாட்டு",
+      langBtn: "English",
+      title: "மாஃபியா",
+      tagline: "இரவில் கொலை. பகலில் விசாரணை. மாஃபியா யார்?",
+      resumeTitle: "ஒரு ஆட்டம் நடந்துகொண்டிருக்கிறது",
+      resumeBtn: "ஆட்டத்தைத் தொடர்", discardBtn: "நீக்கிவிடு",
+      confirmDiscard: "நடந்துகொண்டிருக்கும் ஆட்டத்தை நீக்கவா?",
+      confirmNew: "புதிய ஆட்டத்தைத் தொடங்கவா? நடந்துகொண்டிருக்கும் ஆட்டம் நீக்கப்படும்.",
+      players: "வீரர்கள்", playersHint: "தொகுப்பாளரைத் தவிர, விளையாடும் அனைவரின் பெயர்கள்.",
+      playerN: "வீரர் {n}", addPlayer: "+ வீரரைச் சேர்", removePlayer: "{name}-ஐ நீக்கு",
+      characters: "கதாபாத்திரங்கள்", charactersHint: "ஒவ்வொரு கதாபாத்திரமும் எத்தனை பேருக்கு என்று தேர்ந்தெடுங்கள்.",
+      teamMafia: "மாஃபியா குழு", teamVillage: "கிராமம்", teamSolo: "தனி ஆள்",
+      teamMafiaShort: "மாஃபியா", teamVillageShort: "கிராமம்", teamSoloShort: "தனி ஆள்",
+      less: "{role}: ஒன்று குறை", more: "{role}: ஒன்று சேர்",
+      customTitle: "+ உங்கள் சொந்தக் கதாபாத்திரம்",
+      customName: "பெயர்", customTeam: "அணி", customDesc: "இவர் என்ன செய்வார்?", customWakes: "இரவில் கண் விழிப்பார்",
+      customAdd: "கதாபாத்திரத்தைச் சேர்", customDelete: "நீக்கு", customNeedName: "கதாபாத்திரத்தின் பெயரை உள்ளிடுங்கள்.",
+      customDefaultDesc: "தொகுப்பாளர் சொல்லும் விதிகளைப் பின்பற்றுங்கள்.",
+      options: "விதிகள்", revealOnDeath: "ஒருவர் இறந்தால் அவருடைய கதாபாத்திரத்தை அனைவருக்கும் அறிவி",
+      countStatus: "கதாபாத்திரங்கள் {r} / வீரர்கள் {p}",
+      fillVillagers: "மீதியைக் கிராமவாசிகளாக்கு",
+      deal: "கதாபாத்திரங்களைப் பகிர்",
+      errMin: "மாஃபியா விளையாடக் குறைந்தது {n} வீரர்கள் தேவை.",
+      errMore: "இன்னும் {n} கதாபாத்திரங்கள் தேவை.",
+      errLess: "{n} கதாபாத்திரங்கள் அதிகம். சிலவற்றைக் குறையுங்கள்.",
+      errNoMafia: "குறைந்தது ஒரு மாஃபியா குழு கதாபாத்திரத்தைச் சேருங்கள்.",
+      errTooMany: "மாஃபியா அதிகம்! தொடக்கத்திலேயே அவர்கள் வென்றுவிடுவார்கள்.",
+      warnMafia: "மாஃபியா கொஞ்சம் அதிகம். 3–4 வீரர்களுக்கு ஒரு மாஃபியா இருப்பது நல்லது.",
+      errDup: "“{name}” என்ற பெயர் ஒன்றுக்கு மேல் உள்ளது. ஒவ்வொருவருக்கும் வெவ்வேறு பெயர் கொடுங்கள்.",
+      howTo: "விளையாடுவது எப்படி?",
+      how: [
+        "தொகுப்பாளர் (விளையாடாதவர்) வீரர்களின் பெயர்களையும் கதாபாத்திரங்களையும் தேர்ந்தெடுக்கிறார்.",
+        "கைப்பேசியை ஒவ்வொருவரிடமும் கொடுங்கள். ஒவ்வொருவரும் தங்கள் கதாபாத்திரத்தையும் விதிகளையும் ரகசியமாகப் பார்க்கிறார்கள்.",
+        "கைப்பேசி தொகுப்பாளரிடம் திரும்பும். இரவில், தொகுப்பாளர் திரையில் உள்ளதைச் சத்தமாகப் படித்து ஒவ்வொரு கதாபாத்திரத்தையும் எழுப்புகிறார்.",
+        "காலையில் யார் இறந்தார் என்று அறிவிக்கப்படும். பகலில் அனைவரும் விவாதித்து, ஒருவரை வாக்களித்து வெளியேற்றுகிறார்கள்.",
+        "எல்லா மாஃபியாக்களும் வெளியேறினால் கிராமம் வெற்றி. மாஃபியா மற்றவர்களுக்குச் சமமானால் மாஃபியா வெற்றி."
+      ],
+      giveTo: "கைப்பேசியை இவரிடம் கொடுங்கள்", noPeek: "🙈 மற்றவர்கள் திரையைப் பார்க்க வேண்டாம்!",
+      iAm: "நான் தான் {name}", showRole: "என் கதாபாத்திரத்தைக் காட்டு",
+      coverNote: "யாரும் பார்க்கவில்லை என்பதை உறுதி செய்துகொண்டு அழுத்துங்கள்.",
+      hideRole: "மறைத்துவிட்டு அடுத்தவரிடம் கொடு", hideRoleLast: "மறைத்துவிடு",
+      hiddenNote: "✓ {name}-இன் கதாபாத்திரம் மறைக்கப்பட்டது",
+      youAre: "நீங்கள்", whatYouDo: "நீங்கள் என்ன செய்ய வேண்டும்", howToWin: "வெற்றி பெறுவது எப்படி",
+      yourTeam: "உங்கள் மாஃபியா குழு", aloneMafia: "இந்த ஆட்டத்தில் மாஃபியா குழுவில் நீங்கள் மட்டுமே.",
+      goal_village: "எல்லா மாஃபியாக்களும் வெளியேறினால் கிராமம் வெற்றி பெறும்.",
+      goal_village_sk: "எல்லா மாஃபியாக்களும் தொடர் கொலைகாரனும் வெளியேறினால் கிராமம் வெற்றி பெறும்.",
+      goal_mafia: "மாஃபியாக்களின் எண்ணிக்கை மற்றவர்களுக்குச் சமமாகவோ அதிகமாகவோ ஆனால் மாஃபியா வெற்றி.",
+      goal_mafia_sk: "தொடர் கொலைகாரன் இறந்த பிறகு, மாஃபியாக்களின் எண்ணிக்கை மற்றவர்களுக்குச் சமமாகவோ அதிகமாகவோ ஆனால் மாஃபியா வெற்றி.",
+      goal_jester: "பகல் வாக்கெடுப்பில் நீங்கள் வெளியேற்றப்பட்டால், நீங்கள் மட்டும் வெற்றி. இரவில் கொல்லப்பட்டால் கணக்கில் இல்லை.",
+      goal_killer: "கடைசியாக உயிருடன் இருக்கும் இருவரில் நீங்களும் ஒருவர் என்றால் நீங்கள் வெற்றி.",
+      goal_solo: "நீங்கள் தனி ஆள். தொகுப்பாளர் சொல்லும் விதிப்படி விளையாடுங்கள்.",
+      backTitle: "அனைவரும் தங்கள் கதாபாத்திரத்தைப் பார்த்துவிட்டனர்!",
+      backTitleOne: "{name} தன் கதாபாத்திரத்தைப் பார்த்துவிட்டார்",
+      backBody: "கைப்பேசியைத் தொகுப்பாளரிடம் திருப்பிக் கொடுங்கள்.",
+      holdHost: "தொகுப்பாளர்: அழுத்திப் பிடிக்கவும்",
+      holdHint: "தொகுப்பாளர் மட்டும்: பொத்தானை 1 வினாடி அழுத்திப் பிடியுங்கள்.",
+      host: "🎩 தொகுப்பாளர்",
+      nightN: "இரவு {n}", dayN: "நாள் {n}",
+      startNight: "இரவு {n}-ஐத் தொடங்கு", startNightHint: "அனைவரையும் கண்களை மூடச் சொல்லிவிட்டுத் தொடங்குங்கள்.",
+      dayHint: "மாஃபியா யார் என்று அனைவரும் விவாதிக்கட்டும்.",
+      resumePhase: "தொடர்", phaseNight: "இரவு நடந்துகொண்டிருக்கிறது", phaseMorning: "காலை அறிவிப்பு", phaseHunter: "வேட்டைக்காரனின் முறை", phaseVote: "வாக்கெடுப்பு நடந்துகொண்டிருக்கிறது", phaseVoteResult: "வாக்கெடுப்பு முடிவு",
+      aliveMafia: "மாஃபியா {n}", aliveVillage: "கிராமம் {n}", aliveSolo: "தனி {n}",
+      playersList: "வீரர்களும் கதாபாத்திரங்களும்", playersListHint: "ஒருவரைத் தொட்டு மாற்றங்கள் செய்யலாம்.",
+      alive: "உயிருடன்", dead: "இறந்தார்", tagHaunted: "பேய் பிடித்தவர்", tagLover: "காதலர்",
+      markDead: "இறந்ததாகக் குறி", revive: "மீண்டும் உயிர்ப்பி", showAgain: "{name}-க்கு கதாபாத்திரத்தை மீண்டும் காட்டு",
+      confirmShowAgain: "கைப்பேசியை {name}-இடம் கொடுத்து, அவருடைய கதாபாத்திரத்தை மட்டும் காட்டவா?",
+      winReady: "விதிப்படி ஆட்டம் முடிந்தது: {who}", endGameNow: "முடிவைக் காட்டு",
+      endGame: "ஆட்டத்தை முடி", confirmEnd: "இந்த ஆட்டத்தை இப்போதே முடிக்கவா?",
+      log: "நடந்தவை", logEmpty: "இன்னும் எதுவும் நடக்கவில்லை.",
+      timer: "விவாத நேரம்", tStart: "தொடங்கு", tPause: "நிறுத்து", tReset: "மீட்டமை", timeUp: "நேரம் முடிந்தது!",
+      startVote: "வாக்கெடுப்பைத் தொடங்கு",
+      toDashboard: "☰ வீரர்கள்",
+      stepOf: "படி {i} / {n}",
+      readAloud: "📢 சத்தமாகப் படியுங்கள்",
+      introLine: "இரவு {n}. அனைவரும் கண்களை மூடிக்கொள்ளுங்கள்.",
+      introHint: "எல்லோரும் கண்களை மூடிய பிறகு தொடங்குங்கள்.",
+      begin: "தொடங்கு",
+      who: "யார்: {names}",
+      tapChoice: "அவர்கள் சுட்டிக்காட்டியவரைத் தொடுங்கள்:",
+      tapTwo: "இருவரைத் தொடுங்கள்:",
+      noOne: "யாரும் இல்லை",
+      inactiveDead: "இந்தக் கதாபாத்திரம் உயிருடன் இல்லை. யாரும் ஊகிக்காமல் இருக்க, வழக்கம் போல அழைத்து, சில வினாடிகள் காத்திருந்து தொடருங்கள்.",
+      inactiveGhost: "பேய் இன்னும் உயிருடன் இருக்கிறது, அதனால் செய்ய எதுவும் இல்லை. யாரும் ஊகிக்காமல் இருக்க, வழக்கம் போல அழைத்து, சில வினாடிகள் காத்திருந்து தொடருங்கள்.",
+      inactiveWitch: "இரண்டு மருந்துகளும் தீர்ந்துவிட்டன. யாரும் ஊகிக்காமல் இருக்க, வழக்கம் போல அழைத்து, சில வினாடிகள் காத்திருந்து தொடருங்கள்.",
+      sleepLine: "{role}, கண்களை மூடுங்கள்.",
+      next: "அடுத்து: {role}", wakeAll: "அனைவரையும் எழுப்பு",
+      showResult: "முடிவைக் காட்டு", showToPolice: "இதைக் காவலருக்கு மட்டும் காட்டுங்கள்", showToDetective: "இதைத் துப்பறிவாளருக்கு மட்டும் காட்டுங்கள்",
+      policeYes: "ஆம், மாஃபியா!", policeNo: "மாஃபியா இல்லை", done: "முடிந்தது",
+      wake_cupid: "மன்மதனே, கண் விழியுங்கள். காதலர்களாகப் போகும் இருவரைச் சுட்டிக்காட்டுங்கள்.",
+      cupidAfter: "மன்மதனே, கண்களை மூடுங்கள். நான் காதலர்களின் தோளைத் தொடுவேன். காதலர்களே, கண் திறந்து ஒருவரையொருவர் பார்த்துவிட்டு, கண்களை மூடுங்கள்.",
+      wake_mafia: "மாஃபியா, கண் விழியுங்கள். யாரைக் கொல்ல வேண்டும் என்று சைகையால் முடிவு செய்து சுட்டிக்காட்டுங்கள்.",
+      wake_framer: "சதிகாரனே, கண் விழியுங்கள். யார் மீது பழி சுமத்த வேண்டும் என்று சுட்டிக்காட்டுங்கள்.",
+      wake_killer: "தொடர் கொலைகாரனே, கண் விழியுங்கள். யாரைக் கொல்ல வேண்டும் என்று சுட்டிக்காட்டுங்கள்.",
+      wake_bodyguard: "மெய்க்காப்பாளரே, கண் விழியுங்கள். யாரைக் காக்க வேண்டும் என்று சுட்டிக்காட்டுங்கள்.",
+      wake_doctor: "மருத்துவரே, கண் விழியுங்கள். யாரைக் காப்பாற்ற வேண்டும் என்று சுட்டிக்காட்டுங்கள்.",
+      wake_witch: "சூனியக்காரியே, கண் விழியுங்கள். இன்றிரவு தாக்கப்பட்டவர் இவர். உயிர் மருந்தைப் பயன்படுத்த வேண்டுமா? யாருக்காவது விஷம் கொடுக்க வேண்டுமா?",
+      wake_police: "காவலரே, கண் விழியுங்கள். நீங்கள் சந்தேகப்படுபவரைச் சுட்டிக்காட்டுங்கள்.",
+      wake_detective: "துப்பறிவாளரே, கண் விழியுங்கள். யாரை விசாரிக்க வேண்டும் என்று சுட்டிக்காட்டுங்கள்.",
+      wake_ghost: "பேயே, கண் விழியுங்கள். யாரைப் பிடிக்க வேண்டும் என்று சுட்டிக்காட்டுங்கள்.",
+      wake_custom: "{role}, கண் விழித்து உங்கள் செயலைச் செய்யுங்கள்.",
+      witchAttacked: "இன்றிரவு தாக்கப்பட்டவர்: {names}. அவரைச் சூனியக்காரிக்குச் சுட்டிக்காட்டுங்கள்.",
+      witchNoAttack: "இன்றிரவு யாரும் தாக்கப்படவில்லை. அதைச் சூனியக்காரிக்குச் சைகையால் காட்டுங்கள்.",
+      witchHeal: "உயிர் மருந்து: யாரைக் காப்பாற்ற வேண்டும்?", witchHealUsed: "உயிர் மருந்து ஏற்கெனவே பயன்படுத்தப்பட்டது.",
+      witchPoison: "விஷம்: யாருக்குக் கொடுக்க வேண்டும்?", witchPoisonUsed: "விஷம் ஏற்கெனவே பயன்படுத்தப்பட்டது.",
+      dontUse: "பயன்படுத்த வேண்டாம்",
+      wakeEveryone: "அனைவரும் கண் விழியுங்கள்!",
+      killedLine: "நேற்றிரவு {name} கொல்லப்பட்டார்.",
+      heartLine: "{name} மனமுடைந்து இறந்தார்.",
+      nobodyDied: "நேற்றிரவு யாரும் இறக்கவில்லை!",
+      wasRole: "{name} ஒரு {role}.",
+      hostOnlyTitle: "தொகுப்பாளருக்கு மட்டும் (சத்தமாகச் சொல்ல வேண்டாம்):",
+      hauntLine: "இன்று {name}-க்குப் பேய் பிடித்துள்ளது: அவர் பேசவோ வாக்களிக்கவோ கூடாது.",
+      continue: "தொடர்",
+      hunterTitle: "{name} ஒரு வேட்டைக்காரன்!",
+      hunterLine: "வேட்டைக்காரனே, யாரைச் சுட்டு வீழ்த்த வேண்டும் என்று சுட்டிக்காட்டுங்கள்.",
+      hunterShoot: "சுட்டு வீழ்த்து", hunterSkip: "யாரையும் சுட வேண்டாம்",
+      hunterKilled: "வேட்டைக்காரன் {name}-ஐச் சுட்டு வீழ்த்தினார்.", hunterNone: "வேட்டைக்காரன் யாரையும் சுடவில்லை.",
+      voteTitle: "வாக்கெடுப்பு", voteHint: "ஒவ்வொருவரும் ஒருவரைச் சுட்டிக்காட்டட்டும். அதிக வாக்குகள் பெற்றவரைத் தொடுங்கள்.",
+      cantVote: "வாக்களிக்கக் கூடாது", mayorNote: "{name} ஊர்த் தலைவர்: அவருடைய வாக்கு இரண்டாகக் கணக்கிடப்படும்.",
+      noElim: "யாரும் வெளியேற வேண்டாம் (சமநிலை)", eliminate: "{name}-ஐ வெளியேற்று",
+      outLine: "{name} வெளியேற்றப்பட்டார்.", noOutLine: "இன்று யாரும் வெளியேற்றப்படவில்லை.",
+      jesterLine: "{name} ஒரு கோமாளி! அனைவரையும் ஏமாற்றிவிட்டார்!",
+      win_village: "கிராமம் வென்றது!", win_mafia: "மாஃபியா வென்றது!", win_jester: "கோமாளி வென்றார்!", win_killer: "தொடர் கொலைகாரன் வென்றார்!", win_none: "ஆட்டம் முடிந்தது",
+      winSub_village: "எல்லா எதிரிகளும் பிடிபட்டனர்.", winSub_mafia: "மாஃபியா கிராமத்தைக் கைப்பற்றியது.", winSub_jester: "{name} அனைவரையும் ஏமாற்றிவிட்டார்.", winSub_killer: "{name} அனைவரையும் வீழ்த்திவிட்டார்.", winSub_none: "தொகுப்பாளர் ஆட்டத்தை முடித்தார்.",
+      allRoles: "யார் யார் என்ன?", playAgain: "அதே அமைப்புடன் மீண்டும் விளையாடு", changeSetup: "அமைப்புகளை மாற்று",
+      log_kill_mafia: "மாஃபியா {name}-ஐக் கொன்றது", log_kill_killer: "தொடர் கொலைகாரன் {name}-ஐக் கொன்றான்", log_kill_poison: "சூனியக்காரி {name}-க்கு விஷம் கொடுத்தாள்",
+      log_kill_guard: "மெய்க்காப்பாளர் {name} உயிர் விட்டார்", log_kill_heartbreak: "{name} மனமுடைந்து இறந்தார்", log_kill_vote: "{name} வாக்கெடுப்பில் வெளியேற்றப்பட்டார்",
+      log_kill_hunter: "வேட்டைக்காரன் {name}-ஐச் சுட்டார்", log_kill_host: "தொகுப்பாளர் {name}-ஐ இறந்ததாகக் குறித்தார்",
+      log_saved_doctor: "மருத்துவர் {name}-ஐக் காப்பாற்றினார்", log_saved_guard: "மெய்க்காப்பாளர் {name}-ஐக் காத்தார்", log_saved_witch: "சூனியக்காரி {name}-ஐக் காப்பாற்றினாள்",
+      log_revive: "{name} மீண்டும் உயிர்ப்பிக்கப்பட்டார்", log_novote: "யாரும் வெளியேற்றப்படவில்லை", log_nokill: "மாஃபியா யாரையும் தாக்கவில்லை",
+      log_haunt: "பேய் {name}-ஐப் பிடித்தது", log_police: "காவலர் {name}-ஐச் சோதித்தார்: {res}", log_detective: "துப்பறிவாளர் {name}-ஐச் சோதித்தார்: {role}",
+      log_frame: "சதிகாரன் {name} மீது பழி சுமத்தினான்", log_lovers: "{a} ❤ {b} காதலர்களானார்கள்"
+    },
+    en: {
+      docTitle: "Mafia | Party game",
+      langBtn: "தமிழ்",
+      title: "Mafia",
+      tagline: "Murder by night. Trial by day. Who is the Mafia?",
+      resumeTitle: "A game is in progress",
+      resumeBtn: "Continue game", discardBtn: "Discard",
+      confirmDiscard: "Discard the game in progress?",
+      confirmNew: "Start a new game? The game in progress will be discarded.",
+      players: "Players", playersHint: "Everyone who's playing, not counting the host.",
+      playerN: "Player {n}", addPlayer: "+ Add player", removePlayer: "Remove {name}",
+      characters: "Characters", charactersHint: "Choose how many players get each character.",
+      teamMafia: "Mafia team", teamVillage: "Village", teamSolo: "Solo",
+      teamMafiaShort: "Mafia", teamVillageShort: "Village", teamSoloShort: "Solo",
+      less: "{role}: one fewer", more: "{role}: one more",
+      customTitle: "+ Add your own character",
+      customName: "Name", customTeam: "Team", customDesc: "What do they do?", customWakes: "Wakes up at night",
+      customAdd: "Add character", customDelete: "Remove", customNeedName: "Enter a name for the character.",
+      customDefaultDesc: "Follow the rules the host gives you.",
+      options: "Rules", revealOnDeath: "Announce a player's character when they die",
+      countStatus: "Characters {r} / Players {p}",
+      fillVillagers: "Fill the rest with Villagers",
+      deal: "Deal characters",
+      errMin: "Mafia needs at least {n} players.",
+      errMore: "Add {n} more characters.",
+      errLess: "Remove {n} characters.",
+      errNoMafia: "Add at least one Mafia-team character.",
+      errTooMany: "Too many Mafia: they'd win straight away.",
+      warnMafia: "That's a lot of Mafia. About one Mafia per 3–4 players plays best.",
+      errDup: "“{name}” is used more than once. Give everyone a different name.",
+      howTo: "How to play",
+      how: [
+        "The host (who doesn't play) enters the players and picks the characters.",
+        "Pass the phone around. Each player privately sees their character and its rules.",
+        "The phone goes back to the host. At night, the host reads the script aloud and wakes each character in turn.",
+        "In the morning the host announces who died. During the day everyone argues and votes one player out.",
+        "The village wins when every Mafia member is out. The Mafia win when they equal everyone else."
+      ],
+      giveTo: "Give the phone to", noPeek: "🙈 Everyone else, look away!",
+      iAm: "I'm {name}", showRole: "Show my character",
+      coverNote: "Make sure nobody else is looking, then tap below.",
+      hideRole: "Hide and pass on", hideRoleLast: "Hide",
+      hiddenNote: "✓ {name}'s character is hidden",
+      youAre: "You are the", whatYouDo: "What you do", howToWin: "How you win",
+      yourTeam: "Your Mafia team", aloneMafia: "You're the only one on the Mafia team this game.",
+      goal_village: "The village wins when every Mafia member is out.",
+      goal_village_sk: "The village wins when every Mafia member and the Serial Killer are out.",
+      goal_mafia: "The Mafia win when they equal or outnumber everyone else alive.",
+      goal_mafia_sk: "Once the Serial Killer is dead, the Mafia win when they equal or outnumber everyone else alive.",
+      goal_jester: "You win alone if you're voted out during the day. Being killed at night doesn't count.",
+      goal_killer: "You win if you're one of the last two players alive.",
+      goal_solo: "You play for yourself. Follow the host's rules for your character.",
+      backTitle: "Everyone has seen their character!",
+      backTitleOne: "{name} has seen their character",
+      backBody: "Give the phone back to the host.",
+      holdHost: "Host: press and hold",
+      holdHint: "Host only: hold the button for 1 second.",
+      host: "🎩 Host",
+      nightN: "Night {n}", dayN: "Day {n}",
+      startNight: "Start night {n}", startNightHint: "Ask everyone to close their eyes, then start.",
+      dayHint: "Let everyone discuss who the Mafia might be.",
+      resumePhase: "Continue", phaseNight: "Night in progress", phaseMorning: "Morning announcement", phaseHunter: "The Hunter's turn", phaseVote: "Vote in progress", phaseVoteResult: "Vote result",
+      aliveMafia: "Mafia {n}", aliveVillage: "Village {n}", aliveSolo: "Solo {n}",
+      playersList: "Players and characters", playersListHint: "Tap a player to make changes.",
+      alive: "Alive", dead: "Dead", tagHaunted: "Haunted", tagLover: "Lover",
+      markDead: "Mark as dead", revive: "Bring back to life", showAgain: "Show {name} their character again",
+      confirmShowAgain: "Hand the phone to {name} and show only their character?",
+      winReady: "By the rules, the game is over: {who}", endGameNow: "Show result",
+      endGame: "End game", confirmEnd: "End this game now?",
+      log: "What happened", logEmpty: "Nothing has happened yet.",
+      timer: "Discussion time", tStart: "Start", tPause: "Pause", tReset: "Reset", timeUp: "Time's up!",
+      startVote: "Start the vote",
+      toDashboard: "☰ Players",
+      stepOf: "Step {i} of {n}",
+      readAloud: "📢 Read aloud",
+      introLine: "Night {n}. Everyone, close your eyes.",
+      introHint: "Start once everyone's eyes are closed.",
+      begin: "Start",
+      who: "Who: {names}",
+      tapChoice: "Tap the player they point to:",
+      tapTwo: "Tap two players:",
+      noOne: "Nobody",
+      inactiveDead: "This character is no longer alive. Call it out anyway, wait a few seconds, then continue, so nobody can guess.",
+      inactiveGhost: "The Ghost is still alive, so there's nothing to do. Call it out anyway, wait a few seconds, then continue, so nobody can guess.",
+      inactiveWitch: "Both potions are used up. Call it out anyway, wait a few seconds, then continue, so nobody can guess.",
+      sleepLine: "{role}, close your eyes.",
+      next: "Next: {role}", wakeAll: "Wake everyone up",
+      showResult: "Show the result", showToPolice: "Show this to the Police only", showToDetective: "Show this to the Detective only",
+      policeYes: "Yes, Mafia!", policeNo: "Not Mafia", done: "Done",
+      wake_cupid: "Cupid, wake up. Point to the two players who will fall in love.",
+      cupidAfter: "Cupid, close your eyes. I'll tap the Lovers on the shoulder. Lovers, open your eyes, look at each other, then close them.",
+      wake_mafia: "Mafia, wake up. Silently agree and point to the player you want to kill.",
+      wake_framer: "Framer, wake up. Point to the player you want to frame.",
+      wake_killer: "Serial Killer, wake up. Point to the player you want to kill.",
+      wake_bodyguard: "Bodyguard, wake up. Point to the player you want to guard.",
+      wake_doctor: "Doctor, wake up. Point to the player you want to save.",
+      wake_witch: "Witch, wake up. This is who was attacked tonight. Do you want to use your healing potion? Do you want to poison someone?",
+      wake_police: "Police, wake up. Point to the player you suspect.",
+      wake_detective: "Detective, wake up. Point to the player you want to investigate.",
+      wake_ghost: "Ghost, wake up. Point to the player you want to haunt.",
+      wake_custom: "{role}, wake up and do your action.",
+      witchAttacked: "Attacked tonight: {names}. Point them out to the Witch.",
+      witchNoAttack: "Nobody was attacked tonight. Signal that to the Witch.",
+      witchHeal: "Healing potion: who do they save?", witchHealUsed: "The healing potion has already been used.",
+      witchPoison: "Poison: who do they poison?", witchPoisonUsed: "The poison has already been used.",
+      dontUse: "Don't use it",
+      wakeEveryone: "Everyone, wake up!",
+      killedLine: "Last night, {name} was killed.",
+      heartLine: "{name} died of a broken heart.",
+      nobodyDied: "Nobody died last night!",
+      wasRole: "{name} was the {role}.",
+      hostOnlyTitle: "Host only (don't read this aloud):",
+      hauntLine: "{name} is haunted today: they can't speak or vote.",
+      continue: "Continue",
+      hunterTitle: "{name} was the Hunter!",
+      hunterLine: "Hunter, point to the player you take down with you.",
+      hunterShoot: "Take them down", hunterSkip: "Don't shoot anyone",
+      hunterKilled: "The Hunter took down {name}.", hunterNone: "The Hunter didn't shoot anyone.",
+      voteTitle: "The vote", voteHint: "Everyone points at one player. Tap the player with the most votes.",
+      cantVote: "can't vote", mayorNote: "{name} is the Mayor: their vote counts as two.",
+      noElim: "Nobody is out (tie)", eliminate: "Vote out {name}",
+      outLine: "{name} has been voted out.", noOutLine: "Nobody was voted out today.",
+      jesterLine: "{name} was the Joker, and fooled you all!",
+      win_village: "The village wins!", win_mafia: "The Mafia win!", win_jester: "The Joker wins!", win_killer: "The Serial Killer wins!", win_none: "Game over",
+      winSub_village: "Every enemy of the village has been caught.", winSub_mafia: "The Mafia have taken over the village.", winSub_jester: "{name} fooled everyone.", winSub_killer: "{name} outlasted everyone.", winSub_none: "The host ended the game.",
+      allRoles: "Who was who", playAgain: "Play again with the same setup", changeSetup: "Change setup",
+      log_kill_mafia: "The Mafia killed {name}", log_kill_killer: "The Serial Killer killed {name}", log_kill_poison: "The Witch poisoned {name}",
+      log_kill_guard: "Bodyguard {name} died protecting someone", log_kill_heartbreak: "{name} died of a broken heart", log_kill_vote: "{name} was voted out",
+      log_kill_hunter: "The Hunter shot {name}", log_kill_host: "The host marked {name} as dead",
+      log_saved_doctor: "The Doctor saved {name}", log_saved_guard: "The Bodyguard protected {name}", log_saved_witch: "The Witch healed {name}",
+      log_revive: "{name} was brought back to life", log_novote: "Nobody was voted out", log_nokill: "The Mafia didn't attack anyone",
+      log_haunt: "The Ghost haunted {name}", log_police: "The Police checked {name}: {res}", log_detective: "The Detective checked {name}: {role}",
+      log_frame: "The Framer framed {name}", log_lovers: "{a} ❤ {b} became Lovers"
+    }
+  };
+
+  /* =====================================================================
+     HELPERS
+     ===================================================================== */
+  const MIN_PLAYERS = 4, MAX_PLAYERS = 20, HOLD_MS = 1000, TAP_GUARD_MS = 450;
+  const SETTINGS_KEY = "mafia-settings-v1", GAME_KEY = "mafia-game-v1";
+  const $app = document.getElementById("app");
+
+  function randInt(n) {
+    const c = window.crypto;
+    if (c && c.getRandomValues) {
+      const buf = new Uint32Array(1), limit = Math.floor(0x100000000 / n) * n;
+      do { c.getRandomValues(buf); } while (buf[0] >= limit);
+      return buf[0] % n;
+    }
+    return Math.floor(Math.random() * n);
+  }
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = randInt(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function load(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
+  function store(key, v) { try { if (v == null) localStorage.removeItem(key); else localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
+
+  let lockUntil = 0;
+  function lockTaps(ms) { lockUntil = Date.now() + (ms || TAP_GUARD_MS); }
+
+  // Tiny element builder. Click handlers are tap-guarded automatically.
+  function h(tag, props, ...kids) {
+    const e = document.createElement(tag);
+    if (props) for (const k in props) {
+      const v = props[k];
+      if (v == null || v === false) continue;
+      if (k === "class") e.className = v;
+      else if (k === "text") e.textContent = v;
+      else if (k === "style") e.style.cssText = v;
+      else if (k === "onclick") e.addEventListener("click", ev => { if (Date.now() < lockUntil) { ev.preventDefault(); return; } v(ev); });
+      else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+      else if (k === "value" || k === "checked") e[k] = v;
+      else e.setAttribute(k, v === true ? "" : v);
+    }
+    for (const c of kids.flat()) {
+      if (c == null || c === false) continue;
+      e.appendChild(typeof c === "object" ? c : document.createTextNode(String(c)));
+    }
+    return e;
+  }
+
+  /* =====================================================================
+     SETTINGS + LANGUAGE
+     ===================================================================== */
+  const savedSettings = load(SETTINGS_KEY) || {};
+  const settings = {
+    lang: savedSettings.lang === "en" ? "en" : "ta",
+    names: Array.isArray(savedSettings.names) && savedSettings.names.length ? savedSettings.names.slice(0, MAX_PLAYERS).map(String) : ["", "", "", "", "", "", ""],
+    counts: savedSettings.counts && typeof savedSettings.counts === "object" ? savedSettings.counts : { mafia: 1, boss: 1, villager: 2, doctor: 1, police: 1, detective: 1 },
+    custom: Array.isArray(savedSettings.custom) ? savedSettings.custom : [],
+    revealRoles: !!savedSettings.revealRoles
+  };
+  function saveSettings() { store(SETTINGS_KEY, settings); }
+
+  function t(key, params) {
+    let s = STR[settings.lang][key];
+    if (s == null) s = STR.en[key];
+    if (s == null) return key;
+    if (typeof s !== "string") return s;
+    return s.replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? params[k] : m));
+  }
+
+  /* =====================================================================
+     ENGINE (pure game rules over a plain state object)
+     ===================================================================== */
+  function customOf(key, g) {
+    const list = (g && g.customRoles) || settings.custom;
+    return list.find(c => c.id === key) || null;
+  }
+  function teamOf(key, g) {
+    if (ROLES[key]) return ROLES[key].team;
+    const c = customOf(key, g);
+    return c ? c.team : "village";
+  }
+  function roleInfo(key, g) {
+    if (ROLES[key]) {
+      const tx = ROLE_TEXT[settings.lang][key];
+      return { key, team: ROLES[key].team, emoji: ROLES[key].emoji, name: tx.name, short: tx.short, does: tx.does };
+    }
+    const c = customOf(key, g);
+    if (!c) return { key, team: "village", emoji: "❔", name: key, short: "", does: "" };
+    return { key, team: c.team, emoji: c.wakes ? "🌙" : "⭐", name: c.name, short: c.desc || t("customDefaultDesc"), does: c.desc || t("customDefaultDesc"), custom: true, wakes: c.wakes };
+  }
+  const roleName = (key, g) => roleInfo(key, g).name;
+
+  function createGame(names, counts, customRoles, revealRoles) {
+    const deck = [];
+    Object.keys(counts).forEach(k => { for (let i = 0; i < counts[k]; i++) deck.push(k); });
+    if (deck.length !== names.length) throw new Error("deck size mismatch");
+    shuffle(deck);
+    const present = {};
+    deck.forEach(k => { present[k] = true; });
+    return {
+      v: 1,
+      players: names.map((name, i) => ({ name, role: deck[i], alive: true })),
+      customRoles: JSON.parse(JSON.stringify(customRoles || [])),
+      present, revealRoles: !!revealRoles,
+      stage: "reveal", revealIdx: 0, reshow: null,
+      round: 1, phase: "night-ready",
+      night: null, morning: null, haunted: null, lovers: null,
+      witchUsed: { heal: false, poison: false },
+      hunterQueue: [], afterHunter: null, lastVote: undefined, lastHunterShot: undefined,
+      log: [], winner: null, winnerIdx: null
+    };
+  }
+
+  const holders = (g, key) => g.players.map((p, i) => i).filter(i => key === "mafia" ? teamOf(g.players[i].role, g) === "mafia" : g.players[i].role === key);
+  const aliveIdx = g => g.players.map((p, i) => i).filter(i => g.players[i].alive);
+  const holderOf = (g, key) => { const hs = holders(g, key); return hs.length ? hs[0] : null; };
+  function logPh(g) { return (g.phase === "night" || g.phase === "morning" || (g.phase === "hunter" && g.afterHunter === "day")) ? "night" : "day"; }
+  function addLog(g, entry) { entry.r = g.round; entry.ph = entry.ph || logPh(g); g.log.push(entry); }
+
+  const NIGHT_ORDER = ["cupid", "mafia", "framer", "killer", "bodyguard", "doctor", "witch", "police", "detective", "ghost"];
+
+  function buildNightSteps(g) {
+    const steps = [];
+    const anyMafiaPresent = Object.keys(g.present).some(k => teamOf(k, g) === "mafia");
+    NIGHT_ORDER.forEach(key => {
+      if (key === "mafia") {
+        if (anyMafiaPresent) steps.push({ key, active: holders(g, "mafia").some(i => g.players[i].alive), sel: "one" });
+        return;
+      }
+      if (!g.present[key]) return;
+      const hs = holders(g, key);
+      const anyAlive = hs.some(i => g.players[i].alive);
+      if (key === "cupid") { if (g.round === 1) steps.push({ key, active: anyAlive, sel: "two" }); return; }
+      if (key === "ghost") { steps.push({ key, active: hs.some(i => !g.players[i].alive), sel: "one", ghostAlive: anyAlive }); return; }
+      if (key === "witch") { steps.push({ key, active: anyAlive && !(g.witchUsed.heal && g.witchUsed.poison), sel: "witch", witchEmpty: anyAlive }); return; }
+      steps.push({ key, active: anyAlive, sel: "one" });
+    });
+    g.customRoles.forEach(c => {
+      if (c.wakes && g.present[c.id]) steps.push({ key: c.id, active: holders(g, c.id).some(i => g.players[i].alive), sel: "one", custom: true });
+    });
+    return steps;
+  }
+
+  function startNight(g) {
+    g.phase = "night";
+    g.haunted = null;
+    g.morning = null;
+    g.night = { steps: buildNightSteps(g), i: -1, actions: {}, results: {} };
+  }
+
+  function stepDone(g, step) {
+    const a = g.night.actions;
+    if (!step.active) return true;
+    if (step.sel === "two") return a.cupid !== undefined && (a.cupid === null || a.cupid.length === 2);
+    if (step.sel === "witch") return (g.witchUsed.heal || a.witchHeal !== undefined) && (g.witchUsed.poison || a.witchPoison !== undefined);
+    return a[step.key] !== undefined;
+  }
+
+  function policeResult(g, i) {
+    const n = g.night;
+    if (n && n.actions.framer != null && n.actions.framer === i) return true;
+    const p = g.players[i];
+    return teamOf(p.role, g) === "mafia" && p.role !== "boss";
+  }
+  function detectiveResult(g, i) {
+    const n = g.night;
+    if (n && n.actions.framer != null && n.actions.framer === i) return "mafia";
+    const r = g.players[i].role;
+    return r === "boss" ? "villager" : r;
+  }
+
+  function setAction(g, key, value) {
+    g.night.actions[key] = value;
+    if (key === "police" && value != null) g.night.results.police = policeResult(g, value);
+    if (key === "detective" && value != null) g.night.results.detective = detectiveResult(g, value);
+  }
+
+  // The players currently under attack tonight (for the Witch).
+  function attackedTonight(g) {
+    const a = g.night.actions, out = [];
+    if (a.mafia != null) out.push(a.mafia);
+    if (a.killer != null && out.indexOf(a.killer) === -1) out.push(a.killer);
+    return out.filter(i => g.players[i].alive);
+  }
+
+  function killPlayer(g, i, cause) {
+    const p = g.players[i];
+    if (!p || !p.alive) return false;
+    p.alive = false;
+    p.cause = cause;
+    if (g.deathOrder) g.deathOrder.push(i);
+    addLog(g, { t: "kill_" + cause, i });
+    if (p.role === "hunter" && cause !== "host") g.hunterQueue.push(i);
+    if (cause === "vote" && p.role === "jester") { g.winner = "jester"; g.winnerIdx = i; }
+    if (cause !== "host" && g.lovers && g.lovers.indexOf(i) !== -1) {
+      const other = g.lovers[0] === i ? g.lovers[1] : g.lovers[0];
+      if (g.players[other].alive) killPlayer(g, other, "heartbreak");
+    }
+    return true;
+  }
+
+  function resolveNight(g) {
+    const a = g.night.actions;
+    g.deathOrder = [];
+    const saves = [];
+    if (Array.isArray(a.cupid) && a.cupid.length === 2) {
+      g.lovers = a.cupid.slice();
+      addLog(g, { t: "lovers", a: a.cupid[0], b: a.cupid[1] });
+    }
+    if (a.framer != null) addLog(g, { t: "frame", i: a.framer });
+    if (a.police != null) addLog(g, { t: "police", i: a.police, res: g.night.results.police });
+    if (a.detective != null) addLog(g, { t: "detective", i: a.detective, role: g.night.results.detective });
+
+    const attacks = [];
+    if (a.mafia != null) attacks.push({ t: a.mafia, by: "mafia" });
+    else if (g.night.steps.some(s => s.key === "mafia" && s.active)) addLog(g, { t: "nokill" });
+    if (a.killer != null) attacks.push({ t: a.killer, by: "killer" });
+
+    const bg = holderOf(g, "bodyguard");
+    attacks.forEach(at => {
+      if (!g.players[at.t].alive) return;
+      if (a.doctor != null && a.doctor === at.t) { addLog(g, { t: "saved_doctor", i: at.t }); saves.push({ i: at.t, by: "doctor" }); return; }
+      if (bg != null && g.players[bg].alive && a.bodyguard === at.t && bg !== at.t) {
+        addLog(g, { t: "saved_guard", i: at.t }); saves.push({ i: at.t, by: "guard" });
+        killPlayer(g, bg, "guard");
+        return;
+      }
+      if (a.witchHeal != null && a.witchHeal === at.t) { addLog(g, { t: "saved_witch", i: at.t }); saves.push({ i: at.t, by: "witch" }); return; }
+      killPlayer(g, at.t, at.by);
+    });
+    if (a.witchHeal != null) g.witchUsed.heal = true;
+    if (a.witchPoison != null) { g.witchUsed.poison = true; killPlayer(g, a.witchPoison, "poison"); }
+
+    if (a.ghost != null && g.players[a.ghost].alive) { g.haunted = a.ghost; addLog(g, { t: "haunt", i: a.ghost }); }
+    else g.haunted = null;
+
+    const deaths = g.deathOrder;
+    delete g.deathOrder;
+    g.morning = { deaths, saves, night: g.round };
+    g.night = null;
+    g.phase = "morning";
+  }
+
+  function checkWin(g) {
+    const alive = g.players.filter(p => p.alive);
+    const mafia = alive.filter(p => teamOf(p.role, g) === "mafia").length;
+    const sk = alive.filter(p => p.role === "killer").length;
+    if (sk && alive.length <= 2) return "killer";
+    if (!mafia && !sk) return "village";
+    if (!sk && mafia >= alive.length - mafia) return "mafia";
+    return null;
+  }
+
+  function advanceAfterDeaths(g, next) {
+    if (g.winner) { g.phase = "over"; return; }
+    if (g.hunterQueue.length) { g.phase = "hunter"; g.afterHunter = next; g.lastHunterShot = undefined; return; }
+    const w = checkWin(g);
+    if (w) { g.winner = w; if (w === "killer") g.winnerIdx = holderOf(g, "killer"); g.phase = "over"; return; }
+    if (next === "night-ready") g.round++;
+    g.afterHunter = null;
+    g.phase = next;
+  }
+
+  function hunterShoot(g, target) {
+    const hunter = g.hunterQueue[0];
+    g.lastHunterShot = { hunter, target };
+    if (target != null) killPlayer(g, target, "hunter");
+  }
+  function hunterFinish(g) {
+    g.hunterQueue.shift();
+    g.lastHunterShot = undefined;
+    advanceAfterDeaths(g, g.afterHunter);
+  }
+
+  function castVote(g, i) {
+    g.lastVote = i;
+    if (i == null) addLog(g, { t: "novote" });
+    else killPlayer(g, i, "vote");
+    g.phase = "vote-result";
+  }
+
+  function hostToggle(g, i) {
+    const p = g.players[i];
+    if (p.alive) killPlayer(g, i, "host");
+    else { p.alive = true; p.cause = null; addLog(g, { t: "revive", i }); }
+  }
+
+  window.MafiaEngine = { createGame, buildNightSteps, startNight, setAction, stepDone, resolveNight, killPlayer, checkWin, advanceAfterDeaths, hunterShoot, hunterFinish, castVote, policeResult, detectiveResult, attackedTonight, roleInfo: k => roleInfo(k, null) };
+
+  /* =====================================================================
+     APP STATE / ROUTING
+     ===================================================================== */
+  let game = load(GAME_KEY);
+  if (game && (!game.players || game.v !== 1)) game = null;
+  const ui = { screen: "setup", shown: false, expanded: null, overlay: null, customDraft: { name: "", team: "village", desc: "", wakes: false }, setupMsg: null };
+  const timer = { total: 180, left: 180, running: false, id: null };
+
+  function saveGame() { store(GAME_KEY, game); }
+
+  function go(screen, extra) {
+    ui.screen = screen;
+    ui.overlay = null;
+    if (extra) Object.assign(ui, extra);
+    render();
+    window.scrollTo(0, 0);
+    lockTaps();
+  }
+  function rerender() { const y = window.scrollY; render(); window.scrollTo(0, y); }
+
+  const DARK = { handoff: 1, reveal: 1, back: 1, narrate: 1 };
+  function render() {
+    document.documentElement.lang = settings.lang;
+    document.title = t("docTitle");
+    document.body.classList.toggle("dark", !!DARK[ui.screen]);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", DARK[ui.screen] ? "#221338" : "#F7B32B");
+    $app.textContent = "";
+    const view = h("div", { class: "enter" });
+    SCREENS[ui.screen](view);
+    $app.appendChild(view);
+    if (ui.overlay) $app.appendChild(ui.overlay());
+    fitAll();
+    if (game) saveGame();
+  }
+
+  // Shrink big headings until their longest word fits (Tamil words must never be split).
+  function fitAll() {
+    $app.querySelectorAll(".rname, .who, .result-hero h2, .announce h2, .overlay .res, .hero h1").forEach(node => {
+      node.style.fontSize = "";
+      if (!node.clientWidth) return;
+      let size = parseFloat(getComputedStyle(node).fontSize);
+      while (size > 18 && node.scrollWidth > node.clientWidth + 1) {
+        size -= 2;
+        node.style.fontSize = size + "px";
+      }
+    });
+  }
+  window.addEventListener("resize", fitAll);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
+
+  function routeByPhase() {
+    const map = { "night-ready": "host", day: "host", night: "narrate", morning: "morning", hunter: "hunter", vote: "vote", "vote-result": "voteResult", over: "over" };
+    go(map[game.phase] || "host");
+  }
+
+  function langToggle() {
+    return h("button", { class: "pill", type: "button", lang: settings.lang === "ta" ? "en" : "ta", onclick: () => {
+      settings.lang = settings.lang === "ta" ? "en" : "ta";
+      saveSettings();
+      rerender();
+    } }, "🌐 " + t("langBtn"));
+  }
+
+  const teamColor = team => TEAM_COLORS[team] || TEAM_COLORS.village;
+  const teamLabel = team => t(team === "mafia" ? "teamMafiaShort" : team === "solo" ? "teamSoloShort" : "teamVillageShort");
+  const pname = i => game.players[i].name;
+
+  /* =====================================================================
+     SETUP SCREEN
+     ===================================================================== */
+  function allRoleKeys() { return ROLE_ORDER.concat(settings.custom.map(c => c.id)); }
+  function roleCount(k) { return settings.counts[k] || 0; }
+  function totalRoles() { return allRoleKeys().reduce((s, k) => s + roleCount(k), 0); }
+
+  function validate() {
+    const errors = [], warnings = [];
+    const n = settings.names.length;
+    const names = settings.names.map((s, i) => (s || "").replace(/\s+/g, " ").trim() || t("playerN", { n: i + 1 }));
+    const seen = {}, dupIdx = [];
+    names.forEach((nm, i) => { const k = nm.toLowerCase(); if (seen[k] != null) { dupIdx.push(i, seen[k]); if (!errors.dup) errors.dup = nm; } else seen[k] = i; });
+    if (n < MIN_PLAYERS) errors.push(t("errMin", { n: MIN_PLAYERS }));
+    const r = totalRoles();
+    if (r < n) errors.push(t("errMore", { n: n - r }));
+    if (r > n) errors.push(t("errLess", { n: r - n }));
+    const mafia = allRoleKeys().filter(k => teamOf(k) === "mafia").reduce((s, k) => s + roleCount(k), 0);
+    if (!mafia) errors.push(t("errNoMafia"));
+    else if (mafia >= r - mafia) errors.push(t("errTooMany"));
+    else if (mafia > Math.ceil(r / 3)) warnings.push(t("warnMafia"));
+    if (errors.dup) errors.push(t("errDup", { name: errors.dup }));
+    return { errors, warnings, names, dupIdx };
+  }
+
+  function renderSetup(v) {
+    v.appendChild(h("div", { class: "topbar" }, h("span", { class: "grow" }), langToggle()));
+    v.appendChild(h("header", { class: "hero" },
+      h("div", { class: "mark", "aria-hidden": "true" }, "🎩🕴️"),
+      h("h1", { text: t("title") }),
+      h("p", { text: t("tagline") })));
+
+    if (game && game.phase !== "over") {
+      v.appendChild(h("div", { class: "banner" },
+        h("h2", { text: t("resumeTitle") }),
+        h("div", { class: "row2" },
+          h("button", { class: "btn go small", type: "button", onclick: resumeGame }, t("resumeBtn")),
+          h("button", { class: "btn ghost-dark small", type: "button", onclick: () => {
+            if (confirm(t("confirmDiscard"))) { game = null; store(GAME_KEY, null); rerender(); }
+          } }, t("discardBtn")))));
+    }
+
+    // Players
+    const val = validate();
+    const names = h("div", { class: "names" });
+    settings.names.forEach((nm, i) => {
+      const input = h("input", {
+        type: "text", value: nm, maxlength: "18", autocomplete: "off", autocapitalize: "words",
+        placeholder: t("playerN", { n: i + 1 }), "aria-label": t("playerN", { n: i + 1 }),
+        class: ui.showDup && val.dupIdx.indexOf(i) !== -1 ? "invalid" : null,
+        oninput: e => { settings.names[i] = e.target.value; e.target.classList.remove("invalid"); saveSettings(); renderDock(); },
+        onkeydown: e => {
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+          const all = names.querySelectorAll("input");
+          if (all[i + 1]) all[i + 1].focus(); else e.target.blur();
+        }
+      });
+      names.appendChild(h("div", { class: "name-row" },
+        h("span", { class: "num", "aria-hidden": "true" }, String(i + 1)),
+        input,
+        h("button", { class: "x-btn", type: "button", "aria-label": t("removePlayer", { name: nm || t("playerN", { n: i + 1 }) }),
+          disabled: settings.names.length <= MIN_PLAYERS, onclick: () => { settings.names.splice(i, 1); saveSettings(); rerender(); } }, "×")));
+    });
+    v.appendChild(h("section", { class: "panel" },
+      h("h2", { text: t("players") + " (" + settings.names.length + ")" }),
+      h("p", { class: "hint", text: t("playersHint") }),
+      names,
+      h("button", { class: "btn small add-btn", type: "button", disabled: settings.names.length >= MAX_PLAYERS, onclick: () => {
+        settings.names.push(""); saveSettings(); rerender();
+        const all = $app.querySelectorAll(".names input"); all[all.length - 1].focus();
+      } }, t("addPlayer"))));
+
+    // Characters
+    const rolesPanel = h("section", { class: "panel" }, h("h2", { text: t("characters") }), h("p", { class: "hint", text: t("charactersHint") }));
+    [["mafia", "teamMafia"], ["village", "teamVillage"], ["solo", "teamSolo"]].forEach(([team, label]) => {
+      const keys = allRoleKeys().filter(k => teamOf(k) === team);
+      if (!keys.length) return;
+      const [c] = teamColor(team);
+      rolesPanel.appendChild(h("h3", { class: "team-head", style: "--c:" + c }, t(label)));
+      const list = h("div", { class: "roles" });
+      keys.forEach(k => list.appendChild(roleRow(k, c)));
+      rolesPanel.appendChild(list);
+    });
+    rolesPanel.appendChild(customForm());
+    v.appendChild(rolesPanel);
+
+    // Options
+    v.appendChild(h("section", { class: "panel" },
+      h("h2", { text: t("options") }),
+      h("label", { class: "check" },
+        h("input", { type: "checkbox", checked: settings.revealRoles, onchange: e => { settings.revealRoles = e.target.checked; saveSettings(); } }),
+        h("span", { text: t("revealOnDeath") }))));
+
+    v.appendChild(h("details", { class: "howto" },
+      h("summary", { text: t("howTo") }),
+      h("ol", null, t("how").map(s => h("li", { text: s })))));
+
+    v.appendChild(h("div", { class: "dock", id: "dock" }));
+    renderDock(v.querySelector("#dock"));
+  }
+
+  function roleRow(k, c) {
+    const info = roleInfo(k);
+    const n = roleCount(k);
+    const max = ROLES[k] ? ROLES[k].max : 99;
+    const set = d => {
+      settings.counts[k] = Math.max(0, Math.min(max, roleCount(k) + d));
+      saveSettings();
+      rerender();
+    };
+    const desc = h("div", { class: "sh" }, info.short,
+      info.custom ? h("div", null, h("button", { class: "del", type: "button", onclick: () => {
+        settings.custom = settings.custom.filter(x => x.id !== k);
+        delete settings.counts[k];
+        saveSettings(); rerender();
+      } }, t("customDelete"))) : null);
+    return h("div", { class: "role-row" + (n ? " on" : ""), style: "--c:" + c },
+      h("div", { class: "emo", "aria-hidden": "true" }, info.emoji),
+      h("div", { class: "nm" }, info.name),
+      desc,
+      h("div", { class: "stepper" },
+        h("button", { type: "button", "aria-label": t("less", { role: info.name }), disabled: n <= 0, onclick: () => set(-1) }, "−"),
+        h("output", { "aria-live": "polite" }, String(n)),
+        h("button", { type: "button", "aria-label": t("more", { role: info.name }), disabled: n >= max, onclick: () => set(1) }, "+")));
+  }
+
+  function customForm() {
+    const d = ui.customDraft;
+    const teamBtns = h("div", { class: "seg3", role: "group", "aria-label": t("customTeam") },
+      ["village", "mafia", "solo"].map(team => h("button", {
+        type: "button", style: "--c:" + teamColor(team)[0], "aria-pressed": String(d.team === team),
+        onclick: () => { d.team = team; rerender(); }
+      }, teamLabel(team))));
+    const err = h("p", { class: "msg err", hidden: true });
+    return h("details", { class: "custom", open: ui.customOpen || null, ontoggle: e => { ui.customOpen = e.target.open; } },
+      h("summary", { text: t("customTitle") }),
+      h("label", { class: "field" }, h("span", { text: t("customName") }),
+        h("input", { type: "text", maxlength: "24", value: d.name, oninput: e => { d.name = e.target.value; } })),
+      h("div", { class: "field" }, h("span", { text: t("customTeam") }), teamBtns),
+      h("label", { class: "field" }, h("span", { text: t("customDesc") }),
+        h("textarea", { maxlength: "240", oninput: e => { d.desc = e.target.value; } }, d.desc)),
+      h("label", { class: "check" },
+        h("input", { type: "checkbox", checked: d.wakes, onchange: e => { d.wakes = e.target.checked; } }),
+        h("span", { text: t("customWakes") })),
+      err,
+      h("button", { class: "btn small", type: "button", onclick: () => {
+        const name = d.name.trim();
+        if (!name) { err.textContent = t("customNeedName"); err.hidden = false; return; }
+        const id = "c" + Date.now().toString(36);
+        settings.custom.push({ id, name, team: d.team, desc: d.desc.trim(), wakes: d.wakes });
+        settings.counts[id] = 1;
+        ui.customDraft = { name: "", team: "village", desc: "", wakes: false };
+        saveSettings(); rerender();
+      } }, t("customAdd")));
+  }
+
+  function renderDock(dock) {
+    dock = dock || document.getElementById("dock");
+    if (!dock) return;
+    const val = validate();
+    const r = totalRoles(), p = settings.names.length;
+    dock.textContent = "";
+    const status = h("div", { class: "status" },
+      h("span", { class: r === p ? "ok" : "bad" }, (r === p ? "✓ " : "") + t("countStatus", { r, p })),
+      r < p ? h("button", { class: "pill", type: "button", onclick: () => {
+        settings.counts.villager = roleCount("villager") + (p - r); saveSettings(); rerender();
+      } }, t("fillVillagers")) : null);
+    dock.appendChild(status);
+    const shown = ui.showErrors ? val.errors : [];
+    shown.forEach(e => dock.appendChild(h("p", { class: "msg err", role: "alert" }, e)));
+    if (!val.errors.length) val.warnings.forEach(w => dock.appendChild(h("p", { class: "msg warn" }, w)));
+    dock.appendChild(h("button", { class: "btn primary", type: "button", onclick: deal }, t("deal")));
+  }
+
+  function deal() {
+    const val = validate();
+    if (val.errors.length) { ui.showErrors = true; ui.showDup = true; rerender(); return; }
+    if (game && game.phase !== "over" && !confirm(t("confirmNew"))) return;
+    if (document.activeElement) document.activeElement.blur();
+    const counts = {};
+    allRoleKeys().forEach(k => { if (roleCount(k)) counts[k] = roleCount(k); });
+    game = createGame(val.names, counts, settings.custom, settings.revealRoles);
+    ui.showErrors = false; ui.showDup = false;
+    go("handoff", { shown: false });
+  }
+
+  function resumeGame() {
+    if (game.stage === "reveal") go("handoff", { shown: false });
+    else go("back");
+  }
+
+  /* =====================================================================
+     HANDOFF / REVEAL / BACK TO HOST
+     ===================================================================== */
+  const revealTarget = () => (game.reshow != null ? game.reshow : game.revealIdx);
+
+  function progressDots() {
+    if (game.reshow != null) return h("span");
+    return h("div", { class: "dots", "aria-hidden": "true" }, game.players.map((p, i) =>
+      h("i", { class: i < game.revealIdx ? "done" : i === game.revealIdx ? "now" : null })));
+  }
+
+  function renderHandoff(v) {
+    const i = revealTarget();
+    v.appendChild(h("div", { class: "topbar" }, progressDots(), langToggle()));
+    v.appendChild(h("div", { class: "center handoff" },
+      game.reshow == null && i > 0 ? h("p", { class: "done-note", text: t("hiddenNote", { name: pname(i - 1) }) }) : null,
+      h("p", { class: "lead", text: t("giveTo") }),
+      h("h2", { class: "who", text: pname(i) }),
+      h("p", { class: "warnbox", text: t("noPeek") }),
+      h("button", { class: "btn go", type: "button", onclick: () => go("reveal", { shown: false }) }, t("iAm", { name: pname(i) }))));
+  }
+
+  function renderReveal(v) {
+    const i = revealTarget();
+    v.appendChild(h("div", { class: "topbar" }, progressDots(), langToggle()));
+    v.appendChild(h("h2", { class: "center who sm", text: pname(i) }));
+    if (!ui.shown) {
+      v.appendChild(h("div", { class: "card covered" },
+        h("div", { class: "q", "aria-hidden": "true" }, "?"),
+        h("p", { text: t("coverNote") })));
+      v.appendChild(h("button", { class: "btn go", type: "button", onclick: () => { ui.shown = true; rerender(); lockTaps(); } }, t("showRole")));
+      return;
+    }
+    v.appendChild(roleCard(i));
+    const last = game.reshow != null || i === game.players.length - 1;
+    v.appendChild(h("button", { class: "btn ghost-dark", type: "button", onclick: hideRole }, last ? t("hideRoleLast") : t("hideRole")));
+  }
+
+  function roleCard(i) {
+    const p = game.players[i];
+    const info = roleInfo(p.role, game);
+    const [c, cd] = teamColor(info.team);
+    let goal;
+    if (p.role === "jester") goal = t("goal_jester");
+    else if (p.role === "killer") goal = t("goal_killer");
+    else if (info.team === "mafia") goal = t(game.present.killer ? "goal_mafia_sk" : "goal_mafia");
+    else if (info.team === "solo") goal = t("goal_solo");
+    else goal = t(game.present.killer ? "goal_village_sk" : "goal_village");
+    let teamBox = null;
+    if (info.team === "mafia") {
+      const mates = holders(game, "mafia").filter(j => j !== i);
+      teamBox = h("div", { class: "team" },
+        h("h3", { text: t("yourTeam") }),
+        mates.length
+          ? h("ul", null, mates.map(j => h("li", null, pname(j) + " (" + roleName(game.players[j].role, game) + ")")))
+          : h("p", { text: t("aloneMafia") }));
+    }
+    return h("div", { class: "card role", style: "--c:" + c + ";--cd:" + cd, "aria-live": "polite" },
+      h("div", { class: "top" },
+        h("div", { class: "emo", "aria-hidden": "true" }, info.emoji),
+        h("div", { class: "you", text: t("youAre") }),
+        h("div", { class: "rname", text: info.name }),
+        h("span", { class: "chip", text: teamLabel(info.team) })),
+      h("h3", { text: t("whatYouDo") }), h("p", { text: info.does }),
+      h("h3", { text: t("howToWin") }), h("p", { text: goal }),
+      teamBox);
+  }
+
+  function hideRole() {
+    ui.shown = false;
+    if (game.reshow != null) { ui.backName = pname(game.reshow); game.reshow = null; go("back"); return; }
+    game.revealIdx++;
+    if (game.revealIdx < game.players.length) { go("handoff"); return; }
+    game.stage = "play";
+    ui.backName = null;
+    go("back");
+  }
+
+  function holdButton(label, onDone) {
+    let timerId = null;
+    const b = h("button", { class: "btn go hold", type: "button" }, h("span", { class: "fill" }), h("span", { class: "lbl" }, label));
+    const start = e => {
+      if (Date.now() < lockUntil || timerId) return;
+      if (e.cancelable) e.preventDefault();
+      b.classList.add("holding");
+      timerId = setTimeout(() => { timerId = null; b.classList.remove("holding"); onDone(); }, HOLD_MS);
+    };
+    const cancel = () => { if (timerId) { clearTimeout(timerId); timerId = null; } b.classList.remove("holding"); };
+    b.addEventListener("pointerdown", start);
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, cancel));
+    b.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && !e.repeat) start(e); });
+    b.addEventListener("keyup", cancel);
+    b.addEventListener("contextmenu", e => e.preventDefault());
+    return b;
+  }
+
+  function renderBack(v) {
+    v.appendChild(h("div", { class: "topbar" }, h("span"), langToggle()));
+    v.appendChild(h("div", { class: "center handoff" },
+      h("div", { style: "font-size:60px;line-height:1", "aria-hidden": "true" }, "🎩"),
+      h("h2", { class: "who md", text: ui.backName ? t("backTitleOne", { name: ui.backName }) : t("backTitle") }),
+      h("p", { class: "warnbox", text: t("backBody") }),
+      holdButton(t("holdHost"), () => { ui.backName = null; routeByPhase(); }),
+      h("p", { class: "hint-dark", style: "margin-top:14px;font-size:14px", text: t("holdHint") })));
+  }
+
+  /* =====================================================================
+     HOST DASHBOARD
+     ===================================================================== */
+  function aliveCounts() {
+    const out = { mafia: 0, village: 0, solo: 0 };
+    game.players.forEach(p => { if (p.alive) out[teamOf(p.role, game)]++; });
+    return out;
+  }
+
+  function hostTop(v, extra) {
+    v.appendChild(h("div", { class: "topbar" }, extra || h("span", { class: "host-tag" }, t("host")), h("span", { class: "grow" }), langToggle()));
+  }
+
+  function renderHost(v) {
+    hostTop(v);
+    const g = game;
+    // Phase card
+    if (g.phase === "night-ready") {
+      v.appendChild(h("section", { class: "phase night" },
+        h("h2", { text: "🌙 " + t("nightN", { n: g.round }) }),
+        h("p", { class: "sub", text: t("startNightHint") }),
+        h("button", { class: "btn go", type: "button", onclick: () => { startNight(g); go("narrate"); } }, t("startNight", { n: g.round }))));
+    } else if (g.phase === "day") {
+      const sec = h("section", { class: "phase day" },
+        h("h2", { text: "☀️ " + t("dayN", { n: g.round }) }),
+        h("p", { class: "sub", text: t("dayHint") }));
+      if (g.haunted != null && g.players[g.haunted].alive) sec.appendChild(h("p", { class: "note", text: "👻 " + t("hauntLine", { name: pname(g.haunted) }) }));
+      sec.appendChild(timerBox());
+      sec.appendChild(h("button", { class: "btn primary", type: "button", onclick: () => { g.phase = "vote"; ui.votePick = undefined; go("vote"); } }, t("startVote")));
+      v.appendChild(sec);
+    } else {
+      const label = { night: "phaseNight", morning: "phaseMorning", hunter: "phaseHunter", vote: "phaseVote", "vote-result": "phaseVoteResult" }[g.phase];
+      v.appendChild(h("section", { class: "phase night" },
+        h("h2", { text: t(label || "resumePhase") }),
+        h("button", { class: "btn go", type: "button", style: "margin-top:12px", onclick: routeByPhase }, t("resumePhase"))));
+    }
+
+    // Win prompt (e.g. after a manual change)
+    const w = checkWin(g);
+    if (w && (g.phase === "night-ready" || g.phase === "day")) {
+      v.appendChild(h("div", { class: "winbox" },
+        h("p", { text: t("winReady", { who: t("win_" + w) }) }),
+        h("button", { class: "btn small", type: "button", onclick: () => { g.winner = w; if (w === "killer") g.winnerIdx = holderOf(g, "killer"); g.phase = "over"; go("over"); } }, t("endGameNow"))));
+    }
+
+    // Players
+    const counts = aliveCounts();
+    const panel = h("section", { class: "panel" },
+      h("h2", { text: t("playersList") }),
+      h("p", { class: "hint", text: t("playersListHint") }),
+      h("div", { class: "counts" },
+        h("span", { style: "--c:" + TEAM_COLORS.mafia[0] }, t("aliveMafia", { n: counts.mafia })),
+        h("span", { style: "--c:" + TEAM_COLORS.village[0] }, t("aliveVillage", { n: counts.village })),
+        counts.solo || Object.keys(g.present).some(k => teamOf(k, g) === "solo") ? h("span", { style: "--c:" + TEAM_COLORS.solo[0] }, t("aliveSolo", { n: counts.solo })) : null));
+    const list = h("ul", { class: "plist" });
+    g.players.forEach((p, i) => {
+      const info = roleInfo(p.role, g);
+      const tags = [];
+      if (g.haunted === i && p.alive && (g.phase === "day" || g.phase === "vote")) tags.push(t("tagHaunted"));
+      if (g.lovers && g.lovers.indexOf(i) !== -1) tags.push("❤ " + t("tagLover"));
+      const row = h("button", { class: "prow" + (p.alive ? "" : " dead"), type: "button", style: "--c:" + teamColor(info.team)[0], "aria-expanded": String(ui.expanded === i),
+        onclick: () => { ui.expanded = ui.expanded === i ? null : i; rerender(); } },
+        h("span", { class: "pe", "aria-hidden": "true" }, p.alive ? info.emoji : "💀"),
+        h("span", null,
+          h("span", { class: "pn" }, p.name), tags.length ? h("span", { class: "tags" }, tags.map(x => h("b", null, x))) : null,
+          h("div", { class: "pr" }, info.name)),
+        h("span", { class: "st" + (p.alive ? "" : " dead") }, p.alive ? t("alive") : t("dead")));
+      const li = h("li", null, row);
+      if (ui.expanded === i) {
+        li.appendChild(h("div", { class: "pactions" },
+          h("button", { class: "btn small" + (p.alive ? " danger" : ""), type: "button", onclick: () => { hostToggle(g, i); ui.expanded = null; rerender(); } }, p.alive ? t("markDead") : t("revive")),
+          h("button", { class: "btn small", type: "button", onclick: () => {
+            if (!confirm(t("confirmShowAgain", { name: p.name }))) return;
+            g.reshow = i; ui.expanded = null; go("handoff", { shown: false });
+          } }, t("showAgain", { name: p.name }))));
+      }
+      list.appendChild(li);
+    });
+    panel.appendChild(list);
+    panel.appendChild(logView());
+    v.appendChild(panel);
+
+    v.appendChild(h("button", { class: "link", type: "button", onclick: () => {
+      if (!confirm(t("confirmEnd"))) return;
+      g.winner = checkWin(g) || "none"; g.phase = "over"; go("over");
+    } }, t("endGame")));
+  }
+
+  function logLine(e) {
+    const g = game;
+    const name = e.i != null ? pname(e.i) : "";
+    let text;
+    if (e.t === "police") text = t("log_police", { name, res: e.res ? t("policeYes") : t("policeNo") });
+    else if (e.t === "detective") text = t("log_detective", { name, role: roleName(e.role, g) });
+    else if (e.t === "lovers") text = t("log_lovers", { a: pname(e.a), b: pname(e.b) });
+    else text = t("log_" + e.t, { name });
+    return h("li", null, h("small", null, t(e.ph === "night" ? "nightN" : "dayN", { n: e.r }) + ": "), text);
+  }
+  function logView(open) {
+    return h("details", { class: "log", open: open || null },
+      h("summary", { text: t("log") }),
+      game.log.length ? h("ol", null, game.log.map(logLine)) : h("p", { class: "hint", text: t("logEmpty") }));
+  }
+
+  function fmt(s) { const m = Math.floor(s / 60), r = s % 60; return m + ":" + String(r).padStart(2, "0"); }
+  function timerBox() {
+    const out = h("output", { id: "timer-out", class: timer.left === 0 ? "up" : null }, timer.left === 0 ? t("timeUp") : fmt(timer.left));
+    const toggle = () => {
+      if (timer.running) { clearInterval(timer.id); timer.running = false; }
+      else {
+        if (timer.left === 0) timer.left = timer.total;
+        timer.running = true;
+        timer.id = setInterval(() => {
+          timer.left = Math.max(0, timer.left - 1);
+          if (timer.left === 0) { clearInterval(timer.id); timer.running = false; if (navigator.vibrate) navigator.vibrate([300, 150, 300]); if (ui.screen === "host") rerender(); return; }
+          const el = document.getElementById("timer-out");
+          if (el) el.textContent = fmt(timer.left);
+        }, 1000);
+      }
+      rerender();
+    };
+    const adj = d => { timer.total = Math.max(30, Math.min(900, timer.total + d)); if (!timer.running) timer.left = timer.total; rerender(); };
+    return h("div", { class: "timer", "aria-label": t("timer") },
+      out,
+      h("div", { class: "tb" },
+        h("button", { type: "button", onclick: () => adj(-30), "aria-label": "−30s" }, "−30s"),
+        h("button", { type: "button", onclick: () => adj(30), "aria-label": "+30s" }, "+30s"),
+        h("button", { type: "button", onclick: toggle }, timer.running ? t("tPause") : t("tStart")),
+        h("button", { type: "button", onclick: () => { clearInterval(timer.id); timer.running = false; timer.left = timer.total; rerender(); } }, t("tReset"))));
+  }
+
+  /* =====================================================================
+     NIGHT NARRATION
+     ===================================================================== */
+  function stepRoleName(step) { return step.key === "mafia" ? roleName("mafia", game) : roleName(step.key, game); }
+
+  function renderNarrate(v) {
+    const g = game, n = g.night;
+    const total = n.steps.length;
+    hostTop(v, h("button", { class: "pill", type: "button", onclick: () => go("host") }, t("toDashboard")));
+    v.appendChild(h("p", { style: "font-weight:700;opacity:.8;margin-bottom:8px", text: "🌙 " + t("nightN", { n: g.round }) + (n.i >= 0 ? " · " + t("stepOf", { i: n.i + 1, n: total }) : "") }));
+
+    if (n.i === -1) {
+      v.appendChild(h("p", { class: "readaloud", text: t("readAloud") }));
+      v.appendChild(h("div", { class: "script", text: t("introLine", { n: g.round }) }));
+      v.appendChild(h("p", { class: "hostnote", text: t("introHint") }));
+      v.appendChild(h("button", { class: "btn go", type: "button", onclick: () => { n.i = 0; if (!total) finishNight(); else go("narrate"); } }, t("begin")));
+      return;
+    }
+
+    const step = n.steps[n.i];
+    const rName = stepRoleName(step);
+    const hs = holders(g, step.key);
+    v.appendChild(h("p", { class: "readaloud", text: t("readAloud") }));
+    v.appendChild(h("div", { class: "script", text: step.custom ? t("wake_custom", { role: rName }) : t("wake_" + step.key) }));
+    v.appendChild(h("p", { class: "hostnote" }, h("b", null, t("who", { names: "" })),
+      hs.map(i => pname(i) + (step.key === "mafia" ? " (" + roleName(g.players[i].role, g) + ")" : "") + (g.players[i].alive ? "" : " 💀")).join(", ")));
+
+    if (!step.active) {
+      const msg = step.key === "ghost" && step.ghostAlive ? "inactiveGhost" : step.key === "witch" && step.witchEmpty ? "inactiveWitch" : "inactiveDead";
+      v.appendChild(h("p", { class: "hostnote", text: t(msg) }));
+    } else if (step.sel === "one") {
+      v.appendChild(h("p", { class: "sub-h", text: t("tapChoice") }));
+      v.appendChild(targetGrid(step.key, n.actions[step.key], i => setAction(g, step.key, i), excludeFor(step)));
+      if ((step.key === "police" || step.key === "detective") && n.actions[step.key] != null) {
+        v.appendChild(h("button", { class: "btn go small", type: "button", style: "margin-top:16px", onclick: () => { ui.overlay = () => resultOverlay(step.key); rerender(); } }, t("showResult")));
+      }
+    } else if (step.sel === "two") {
+      v.appendChild(h("p", { class: "sub-h", text: t("tapTwo") }));
+      v.appendChild(cupidGrid());
+      if (Array.isArray(n.actions.cupid) && n.actions.cupid.length === 2) {
+        v.appendChild(h("p", { class: "readaloud", style: "margin-top:16px", text: t("readAloud") }));
+        v.appendChild(h("div", { class: "script sleep", style: "margin-top:0", text: t("cupidAfter") }));
+        v.appendChild(h("p", { class: "hostnote", text: "❤ " + pname(n.actions.cupid[0]) + " + " + pname(n.actions.cupid[1]) }));
+      }
+    } else if (step.sel === "witch") {
+      const att = attackedTonight(g);
+      v.appendChild(h("p", { class: "hostnote", text: att.length ? t("witchAttacked", { names: att.map(pname).join(", ") }) : t("witchNoAttack") }));
+      v.appendChild(h("p", { class: "sub-h", text: t("witchHeal") }));
+      if (g.witchUsed.heal) v.appendChild(h("p", { class: "hostnote", text: t("witchHealUsed") }));
+      else v.appendChild(targetGrid("witchHeal", n.actions.witchHeal, i => setAction(g, "witchHeal", i), null, att, t("dontUse")));
+      v.appendChild(h("p", { class: "sub-h", text: t("witchPoison") }));
+      if (g.witchUsed.poison) v.appendChild(h("p", { class: "hostnote", text: t("witchPoisonUsed") }));
+      else v.appendChild(targetGrid("witchPoison", n.actions.witchPoison, i => setAction(g, "witchPoison", i), null, null, t("dontUse")));
+    }
+
+    if (step.sel !== "two" || !step.active) v.appendChild(h("div", { class: "script sleep", text: t("sleepLine", { role: rName }) }));
+    const nextStep = n.steps[n.i + 1];
+    v.appendChild(h("button", { class: "btn go", type: "button", style: "margin-top:16px", disabled: !stepDone(g, step),
+      onclick: () => { if (nextStep) { n.i++; go("narrate"); } else finishNight(); } },
+      nextStep ? t("next", { role: stepRoleName(nextStep) }) : t("wakeAll")));
+  }
+
+  function excludeFor(step) {
+    if (step.key === "bodyguard") return holders(game, "bodyguard");
+    return null;
+  }
+
+  function targetGrid(key, current, onPick, exclude, only, noneLabel) {
+    const grid = h("div", { class: "grid", role: "group" });
+    const ids = only || aliveIdx(game);
+    ids.forEach(i => {
+      grid.appendChild(h("button", { class: "target", type: "button", "aria-pressed": String(current === i),
+        disabled: exclude && exclude.indexOf(i) !== -1,
+        onclick: () => { onPick(i); rerender(); } }, pname(i)));
+    });
+    grid.appendChild(h("button", { class: "target none", type: "button", "aria-pressed": String(current === null),
+      onclick: () => { onPick(null); rerender(); } }, noneLabel || t("noOne")));
+    return grid;
+  }
+
+  function cupidGrid() {
+    const a = game.night.actions;
+    const sel = Array.isArray(a.cupid) ? a.cupid : [];
+    const grid = h("div", { class: "grid", role: "group" });
+    aliveIdx(game).forEach(i => {
+      grid.appendChild(h("button", { class: "target", type: "button", "aria-pressed": String(sel.indexOf(i) !== -1),
+        onclick: () => {
+          let s = sel.slice();
+          if (s.indexOf(i) !== -1) s = s.filter(x => x !== i);
+          else { s.push(i); if (s.length > 2) s.shift(); }
+          a.cupid = s;
+          rerender();
+        } }, pname(i)));
+    });
+    grid.appendChild(h("button", { class: "target none", type: "button", "aria-pressed": String(a.cupid === null),
+      onclick: () => { a.cupid = null; rerender(); } }, t("noOne")));
+    return grid;
+  }
+
+  function resultOverlay(key) {
+    const n = game.night;
+    let big, res, label;
+    if (key === "police") {
+      const yes = n.results.police;
+      big = yes ? "👍" : "👎"; res = yes ? t("policeYes") : t("policeNo"); label = t("showToPolice");
+    } else {
+      const r = n.results.detective;
+      const info = roleInfo(r, game);
+      big = info.emoji; res = pname(n.actions.detective) + ": " + info.name; label = t("showToDetective");
+    }
+    return h("div", { class: "overlay", role: "dialog", "aria-modal": "true" },
+      h("p", { style: "font-weight:700;opacity:.8", text: label }),
+      h("div", { class: "big", "aria-hidden": "true" }, big),
+      h("div", { class: "res", text: res }),
+      h("button", { class: "btn ghost-dark", type: "button", onclick: () => { ui.overlay = null; rerender(); } }, t("done")));
+  }
+
+  function finishNight() {
+    resolveNight(game);
+    go("morning");
+  }
+
+  /* =====================================================================
+     MORNING / HUNTER / VOTE / OVER
+     ===================================================================== */
+  function deathLine(i) {
+    const p = game.players[i];
+    const txt = p.cause === "heartbreak" ? t("heartLine", { name: p.name }) : t("killedLine", { name: p.name });
+    const extra = game.revealRoles ? " " + t("wasRole", { name: p.name, role: roleName(p.role, game) }) : "";
+    return h("div", { class: "line death" }, "💀 " + txt + extra);
+  }
+
+  function renderMorning(v) {
+    const g = game, m = g.morning;
+    hostTop(v);
+    v.appendChild(h("div", { class: "announce" },
+      h("div", { class: "big-emo", "aria-hidden": "true" }, "🌅"),
+      h("h2", { text: t("wakeEveryone") })));
+    v.appendChild(h("p", { class: "readaloud", style: "color:var(--ink)", text: t("readAloud") }));
+    const lines = h("div", { class: "lines" });
+    if (!m.deaths.length) lines.appendChild(h("div", { class: "line good" }, "🎉 " + t("nobodyDied")));
+    m.deaths.forEach(i => lines.appendChild(deathLine(i)));
+    if (g.haunted != null && g.players[g.haunted].alive) lines.appendChild(h("div", { class: "line solo" }, "👻 " + t("hauntLine", { name: pname(g.haunted) })));
+    v.appendChild(lines);
+    if (m.saves.length) {
+      const key = { doctor: "log_saved_doctor", guard: "log_saved_guard", witch: "log_saved_witch" };
+      v.appendChild(h("div", { class: "private" },
+        h("p", { style: "margin-bottom:4px", text: t("hostOnlyTitle") }),
+        m.saves.map(s => h("p", { text: "• " + t(key[s.by], { name: pname(s.i) }) }))));
+    }
+    v.appendChild(h("button", { class: "btn primary", type: "button", onclick: () => { advanceAfterDeaths(g, "day"); resetTimer(); routeByPhase(); } }, t("continue")));
+  }
+
+  function resetTimer() { clearInterval(timer.id); timer.running = false; timer.left = timer.total; }
+
+  function renderHunter(v) {
+    const g = game;
+    const hunter = g.hunterQueue[0];
+    hostTop(v);
+    v.appendChild(h("div", { class: "announce" },
+      h("div", { class: "big-emo", "aria-hidden": "true" }, "🏹"),
+      h("h2", { text: t("hunterTitle", { name: pname(hunter) }) })));
+    if (g.lastHunterShot !== undefined) {
+      const tg = g.lastHunterShot.target;
+      const lines = h("div", { class: "lines" });
+      if (tg == null) lines.appendChild(h("div", { class: "line" }, t("hunterNone")));
+      else {
+        const p = g.players[tg];
+        lines.appendChild(h("div", { class: "line death" }, "💀 " + t("hunterKilled", { name: p.name }) + (g.revealRoles ? " " + t("wasRole", { name: p.name, role: roleName(p.role, g) }) : "")));
+        g.players.forEach((q, j) => { if (j !== tg && q.cause === "heartbreak" && !q.alive && g.lovers && g.lovers.indexOf(tg) !== -1 && g.lovers.indexOf(j) !== -1) lines.appendChild(deathLine(j)); });
+      }
+      v.appendChild(lines);
+      v.appendChild(h("button", { class: "btn primary", type: "button", onclick: () => { hunterFinish(g); resetTimer(); routeByPhase(); } }, t("continue")));
+      return;
+    }
+    v.appendChild(h("p", { class: "readaloud", style: "color:var(--ink)", text: t("readAloud") }));
+    v.appendChild(h("div", { class: "line", style: "margin-bottom:18px" }, t("hunterLine")));
+    v.appendChild(targetGrid("hunter", ui.hunterPick, i => { ui.hunterPick = i; }, [hunter], aliveIdx(g), t("hunterSkip")));
+    v.appendChild(h("button", { class: "btn danger", type: "button", style: "margin-top:18px", disabled: ui.hunterPick === undefined,
+      onclick: () => { hunterShoot(g, ui.hunterPick); ui.hunterPick = undefined; go("hunter"); } },
+      ui.hunterPick == null ? (ui.hunterPick === null ? t("hunterSkip") : t("hunterShoot")) : t("hunterShoot") + ": " + pname(ui.hunterPick)));
+  }
+
+  function renderVote(v) {
+    const g = game;
+    hostTop(v, h("button", { class: "pill", type: "button", onclick: () => { g.phase = "day"; go("host"); } }, "‹ " + t("dayN", { n: g.round })));
+    v.appendChild(h("div", { class: "announce" },
+      h("div", { class: "big-emo", "aria-hidden": "true" }, "🗳️"),
+      h("h2", { text: t("voteTitle") })));
+    v.appendChild(h("p", { class: "line", style: "font-family:var(--body);font-size:17px;font-weight:600;margin-bottom:12px", text: t("voteHint") }));
+    if (g.haunted != null && g.players[g.haunted].alive) v.appendChild(h("p", { class: "private", text: "👻 " + t("hauntLine", { name: pname(g.haunted) }) }));
+    const mayor = holderOf(g, "mayor");
+    if (mayor != null && g.players[mayor].alive) v.appendChild(h("p", { class: "private", text: "🎖️ " + t("mayorNote", { name: pname(mayor) }) }));
+    const grid = h("div", { class: "grid", role: "group" });
+    aliveIdx(g).forEach(i => grid.appendChild(h("button", { class: "target", type: "button", "aria-pressed": String(ui.votePick === i),
+      onclick: () => { ui.votePick = i; rerender(); } }, pname(i), g.haunted === i ? h("small", null, "👻 " + t("cantVote")) : null)));
+    grid.appendChild(h("button", { class: "target none", type: "button", "aria-pressed": String(ui.votePick === null),
+      onclick: () => { ui.votePick = null; rerender(); } }, t("noElim")));
+    v.appendChild(grid);
+    v.appendChild(h("button", { class: "btn danger", type: "button", style: "margin-top:18px", disabled: ui.votePick === undefined,
+      onclick: () => { castVote(g, ui.votePick); ui.votePick = undefined; go("voteResult"); } },
+      ui.votePick == null ? (ui.votePick === null ? t("noElim") : t("voteTitle")) : t("eliminate", { name: pname(ui.votePick) })));
+  }
+
+  function renderVoteResult(v) {
+    const g = game, i = g.lastVote;
+    hostTop(v);
+    v.appendChild(h("p", { class: "readaloud", style: "color:var(--ink);margin-top:10px", text: t("readAloud") }));
+    const lines = h("div", { class: "lines" });
+    if (i == null) lines.appendChild(h("div", { class: "line" }, t("noOutLine")));
+    else {
+      const p = g.players[i];
+      if (p.role === "jester") lines.appendChild(h("div", { class: "line solo" }, "🤡 " + t("jesterLine", { name: p.name })));
+      else lines.appendChild(h("div", { class: "line death" }, "⚖️ " + t("outLine", { name: p.name }) + (g.revealRoles ? " " + t("wasRole", { name: p.name, role: roleName(p.role, g) }) : "")));
+      g.players.forEach((q, j) => { if (j !== i && !q.alive && q.cause === "heartbreak" && g.lovers && g.lovers.indexOf(i) !== -1 && g.lovers.indexOf(j) !== -1) lines.appendChild(deathLine(j)); });
+    }
+    v.appendChild(lines);
+    v.appendChild(h("button", { class: "btn primary", type: "button", onclick: () => { advanceAfterDeaths(g, "night-ready"); routeByPhase(); } }, t("continue")));
+  }
+
+  function renderOver(v) {
+    const g = game, w = g.winner || "none";
+    const colors = { village: TEAM_COLORS.village, mafia: TEAM_COLORS.mafia, jester: TEAM_COLORS.solo, killer: TEAM_COLORS.solo, none: ["#221338", "#140A24"] };
+    const emo = { village: "🎉", mafia: "🕴️", jester: "🤡", killer: "🔪", none: "🎭" }[w];
+    v.appendChild(h("div", { class: "topbar" }, h("span"), langToggle()));
+    v.appendChild(h("div", { class: "result-hero", style: "--c:" + colors[w][0] + ";--cd:" + colors[w][1] },
+      h("div", { class: "big-emo", "aria-hidden": "true" }, emo),
+      h("h2", { text: t("win_" + w) }),
+      h("p", { text: t("winSub_" + w, { name: g.winnerIdx != null ? pname(g.winnerIdx) : "" }) })));
+    const list = h("ul", { class: "plist" });
+    g.players.forEach(p => {
+      const info = roleInfo(p.role, g);
+      list.appendChild(h("li", null, h("div", { class: "prow" + (p.alive ? "" : " dead"), style: "--c:" + teamColor(info.team)[0] },
+        h("span", { class: "pe", "aria-hidden": "true" }, info.emoji),
+        h("span", null, h("span", { class: "pn" }, p.name), h("div", { class: "pr" }, info.name)),
+        h("span", { class: "st" + (p.alive ? "" : " dead") }, p.alive ? t("alive") : t("dead")))));
+    });
+    v.appendChild(h("section", { class: "panel" }, h("h2", { text: t("allRoles"), style: "margin-bottom:12px" }), list, logView(true)));
+    v.appendChild(h("button", { class: "btn primary", type: "button", onclick: () => {
+      const counts = {};
+      g.players.forEach(p => { counts[p.role] = (counts[p.role] || 0) + 1; });
+      game = createGame(g.players.map(p => p.name), counts, g.customRoles, g.revealRoles);
+      go("handoff", { shown: false });
+    } }, t("playAgain")));
+    v.appendChild(h("button", { class: "btn", type: "button", onclick: () => { game = null; store(GAME_KEY, null); go("setup"); } }, t("changeSetup")));
+  }
+
+  const SCREENS = {
+    setup: renderSetup, handoff: renderHandoff, reveal: renderReveal, back: renderBack,
+    host: renderHost, narrate: renderNarrate, morning: renderMorning, hunter: renderHunter,
+    vote: renderVote, voteResult: renderVoteResult, over: renderOver
+  };
+
+  window.addEventListener("beforeunload", e => {
+    if (game && game.phase !== "over") { e.preventDefault(); e.returnValue = ""; }
+  });
+
+  go("setup");
+})();
+</script>
+</body>
+</html>
